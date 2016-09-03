@@ -1,6 +1,8 @@
 import p5 from 'p5';
 import 'p5/lib/addons/p5.sound';
 import 'p5/lib/addons/p5.dom';
+import Board from './components/Board';
+import Piece from './components/Piece';
 
 const sketch = (p5) => {
 	// make library globally available
@@ -55,8 +57,7 @@ const sketch = (p5) => {
 					pieceLocations[currentLocation] = new Object;
 					pieceLocations[currentLocation].x = x;
 					pieceLocations[currentLocation].y = y;
-					console.log("location " + currentLocation + " x: " + pieceLocations[currentLocation].x + " y: " + pieceLocations[currentLocation].y);
-
+					// console.log("location " + currentLocation + " x: " + pieceLocations[currentLocation].x + " y: " + pieceLocations[currentLocation].y);
 				}
 			}
 		} else {
@@ -64,52 +65,26 @@ const sketch = (p5) => {
 			boardSize = p5.height;
 		}
 
+		// init objects
 		board = new Board(boardX, boardY, boardSize, boardColor);
+		for(var i = 0; i < pieces.length; i++) {
+			pieces[i] = new Piece(i, pieceSize);
+			console.log(pieces[i]);
+		}
 	}
 
 	p5.draw = () => {
 		p5.background(p5.color(252, 182, 157), 35);
 		board.display();
+		console.log(pieceLocations);
+		pieces.forEach(function(p) {
+			p.display(pieceLocations);
+		});
 	}
 
 	p5.mousePressed = () => {
 		click.x = p5.mouseX;
 		click.y = p5.mouseY;
-	}
-
-	class Piece {
-		constructor(i, size, color) {
-			this.index = i;
-			this.size = size;
-			this.color = color;
-			this.currentLocation = pieceLocations[this.index];
-
-			// use index to load image and sound to piece
-		}
-
-		display() {
-			p5.fill(this.color);
-			p5.rect(this.x, this.y, this.size, this.size);
-		}
-
-		move(from, to) {
-
-		}
-	}
-
-	class Board {
-		constructor(x, y, size, color) {
-			this.x = x;
-			this.y = y;
-			this.size = size;
-			this.color = color;
-		}
-
-		display() {
-			p5.noStroke();
-			p5.fill(255);
-			p5.rect(this.x, this.y, this.size, this.size);
-		}
 	}
 }
 
