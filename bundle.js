@@ -46,6 +46,8 @@
 
 	'use strict';
 
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 	var _p = __webpack_require__(1);
 
 	var _p2 = _interopRequireDefault(_p);
@@ -56,52 +58,134 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
 	var sketch = function sketch(p5) {
 		// make library globally available
 		window.p5 = p5;
 
-		// layout
-		var frame = void 0,
-		    gridSize = void 0,
-		    tileSize = void 0;
-		var tileCount = 9;
+		// palette
+		var boardColor = void 0,
+		    pieceColor = void 0;
 
 		// state
 		var solved = void 0;
 
-		// object
-		var grid = void 0;
-		var tiles = {};
+		// puzzle parts
+		var board = void 0;
+		var boardX = void 0,
+		    boardY = void 0;
+		var columns = 3,
+		    rows = 3;
+		var pieceCount = 8;
+		var pieces = new Array(pieceCount);
+		var boardSize = void 0,
+		    pieceSize = void 0;
+
+		// layout
+		var frameX = void 0,
+		    frameY = void 0;
+		var pieceLocations = new Array(9);
+
+		// interactivity
+		var click = {};
 
 		p5.setup = function () {
 			p5.createCanvas(p5.windowWidth, p5.windowHeight);
-			frame = p5.width / 13;
-			gridSize = p5.width - frame * 2;
-			tileSize = gridSize / tileCount;
-			grid = new Object();
-			setBoard();
+			boardColor = p5.color(255);
+			pieceColor = p5.color(155);
+
+			// determine sizes and layout based on window w and h
+			// todo: draw small square for desktop views
+			if (p5.width <= p5.height) {
+				// when window is portrait or square...
+				frameX = 0;
+				frameY = (p5.height - p5.width) / 2;
+				boardSize = p5.width;
+				boardX = 0;
+				boardY = frameY;
+				pieceSize = boardSize / pieceCount;
+
+				// generate piece locations
+				for (var gridY = 0; gridY < columns; gridY++) {
+					for (var gridX = 0; gridX < rows; gridX++) {
+
+						var x = boardSize / pieceCount * gridX + frameX;
+						var y = boardSize / pieceCount * gridY + frameY;
+
+						var currentLocation = (gridX + 1) * (gridY + 1);
+
+						pieceLocations[currentLocation] = new Object();
+						pieceLocations[currentLocation].x = x;
+						pieceLocations[currentLocation].y = y;
+						console.log("location " + currentLocation + " x: " + pieceLocations[currentLocation].x + " y: " + pieceLocations[currentLocation].y);
+					}
+				}
+			} else {
+				// landscape
+				boardSize = p5.height;
+			}
+
+			board = new Board(boardX, boardY, boardSize, boardColor);
 		};
 
 		p5.draw = function () {
-			p5.background(p5.color(252, 182, 157), 85);
+			p5.background(p5.color(252, 182, 157), 35);
+			board.display();
 		};
 
-		setBoard = function setBoard() {
-			grid = new Array(tileCount);
-			for (var i = 0; i < tileCount; i++) {
-				grid[i] = new Array(tileCount);
-				for (var j = 0; j < tileCount; j++) {
-					grid[i][j] = new Object();
-					grid[i][j].x = tileCount - 1 - i;
-					console.log(grid[i][j].x);
-					grid[i][j].y = tileCount - 1 - j;
-					console.log(grid[i][j].y);
-				}
-			}
-			emptySpot.x = grid[tileCount - 1][tileCount - 1].x;
-			emptySpot.y = grid[tileCount - 1][tileCount - 1].y;
-			solved = false;
+		p5.mousePressed = function () {
+			click.x = p5.mouseX;
+			click.y = p5.mouseY;
 		};
+
+		var Piece = function () {
+			function Piece(i, size, color) {
+				_classCallCheck(this, Piece);
+
+				this.index = i;
+				this.size = size;
+				this.color = color;
+				this.currentLocation = pieceLocations[this.index];
+
+				// use index to load image and sound to piece
+			}
+
+			_createClass(Piece, [{
+				key: 'display',
+				value: function display() {
+					p5.fill(this.color);
+					p5.rect(this.x, this.y, this.size, this.size);
+				}
+			}, {
+				key: 'move',
+				value: function move(from, to) {}
+			}]);
+
+			return Piece;
+		}();
+
+		var Board = function () {
+			function Board(x, y, size, color) {
+				_classCallCheck(this, Board);
+
+				this.x = x;
+				this.y = y;
+				this.size = size;
+				this.color = color;
+			}
+
+			_createClass(Board, [{
+				key: 'display',
+				value: function display() {
+					p5.noStroke();
+					p5.fill(255);
+					p5.rect(this.x, this.y, this.size, this.size);
+				}
+			}]);
+
+			return Board;
+		}();
 	};
 
 	new _p2.default(sketch);
