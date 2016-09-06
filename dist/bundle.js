@@ -46,8 +46,6 @@
 
 	'use strict';
 
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 	var _p = __webpack_require__(1);
 
 	var _p2 = _interopRequireDefault(_p);
@@ -56,9 +54,15 @@
 
 	__webpack_require__(3);
 
-	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+	var _Board = __webpack_require__(4);
 
-	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	var _Board2 = _interopRequireDefault(_Board);
+
+	var _Piece = __webpack_require__(5);
+
+	var _Piece2 = _interopRequireDefault(_Piece);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var sketch = function sketch(p5) {
 		// make library globally available
@@ -104,21 +108,21 @@
 				boardSize = p5.width;
 				boardX = 0;
 				boardY = frameY;
-				pieceSize = boardSize / pieceCount;
+				pieceSize = boardSize / columns;
 
 				// generate piece locations
+				var index = 0;
 				for (var gridY = 0; gridY < columns; gridY++) {
 					for (var gridX = 0; gridX < rows; gridX++) {
 
-						var x = boardSize / pieceCount * gridX + frameX;
-						var y = boardSize / pieceCount * gridY + frameY;
+						var x = boardSize / columns * gridX + frameX;
+						var y = boardSize / rows * gridY + frameY;
 
-						var currentLocation = (gridX + 1) * (gridY + 1);
-
-						pieceLocations[currentLocation] = new Object();
-						pieceLocations[currentLocation].x = x;
-						pieceLocations[currentLocation].y = y;
-						console.log("location " + currentLocation + " x: " + pieceLocations[currentLocation].x + " y: " + pieceLocations[currentLocation].y);
+						pieceLocations[index] = new Object();
+						pieceLocations[index].x = x;
+						pieceLocations[index].y = y;
+						// console.log("location " + index + " x: " + pieceLocations[index].x + " y: " + pieceLocations[index].y);
+						index++;
 					}
 				}
 			} else {
@@ -126,66 +130,32 @@
 				boardSize = p5.height;
 			}
 
-			board = new Board(boardX, boardY, boardSize, boardColor);
+			// init objects
+			board = new _Board2.default(boardX, boardY, boardSize, boardColor);
+			for (var i = 0; i < pieces.length; i++) {
+				pieces[i] = new _Piece2.default(i, pieceSize, pieceLocations[i]);
+			}
 		};
 
 		p5.draw = function () {
 			p5.background(p5.color(252, 182, 157), 35);
 			board.display();
+
+			pieces.forEach(function (p) {
+				p.display(pieceLocations);
+			});
 		};
 
 		p5.mousePressed = function () {
-			click.x = p5.mouseX;
-			click.y = p5.mouseY;
+			checkDistance(p5.mouseX, p5.mouseY);
 		};
 
-		var Piece = function () {
-			function Piece(i, size, color) {
-				_classCallCheck(this, Piece);
-
-				this.index = i;
-				this.size = size;
-				this.color = color;
-				this.currentLocation = pieceLocations[this.index];
-
-				// use index to load image and sound to piece
-			}
-
-			_createClass(Piece, [{
-				key: 'display',
-				value: function display() {
-					p5.fill(this.color);
-					p5.rect(this.x, this.y, this.size, this.size);
-				}
-			}, {
-				key: 'move',
-				value: function move(from, to) {}
-			}]);
-
-			return Piece;
-		}();
-
-		var Board = function () {
-			function Board(x, y, size, color) {
-				_classCallCheck(this, Board);
-
-				this.x = x;
-				this.y = y;
-				this.size = size;
-				this.color = color;
-			}
-
-			_createClass(Board, [{
-				key: 'display',
-				value: function display() {
-					p5.noStroke();
-					p5.fill(255);
-					p5.rect(this.x, this.y, this.size, this.size);
-				}
-			}]);
-
-			return Board;
-		}();
+		function checkDistance(x, y) {
+			// check if mouse/touch is inside piece
+			pieces.forEach(function (p) {
+				return p.isClicked(x, y);
+			});
+		}
 	};
 
 	new _p2.default(sketch);
@@ -43159,6 +43129,100 @@
 
 	}));
 
+
+/***/ },
+/* 4 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Board = function () {
+		function Board(x, y, size, color) {
+			_classCallCheck(this, Board);
+
+			this.x = x;
+			this.y = y;
+			this.size = size;
+			this.color = color;
+		}
+
+		_createClass(Board, [{
+			key: "display",
+			value: function display() {
+				p5.noStroke();
+				p5.fill(255);
+				p5.rect(this.x, this.y, this.size, this.size);
+			}
+		}]);
+
+		return Board;
+	}();
+
+	exports.default = Board;
+
+/***/ },
+/* 5 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Piece = function () {
+		function Piece(i, size, location) {
+			_classCallCheck(this, Piece);
+
+			this.index = i;
+			this.size = size;
+			this.color = p5.random(0, 200);
+			this.position = p5.createVector(location.x, location.y);
+
+			// use index to load image and sound to piece
+		}
+
+		_createClass(Piece, [{
+			key: "display",
+			value: function display(pieceLocations) {
+				p5.fill(this.color);
+				p5.rect(this.position.x, this.position.y, this.size, this.size);
+			}
+		}, {
+			key: "move",
+			value: function move() {
+				var destination = p5.createVector(to.x, to.y);
+			}
+		}, {
+			key: "click",
+			value: function click() {
+				this.color = p5.random(0, 200);
+			}
+		}, {
+			key: "isClicked",
+			value: function isClicked(x, y) {
+				if (x >= this.position.x && x <= this.position.x + this.size && y >= this.position.y && y <= this.position.y + this.size) {
+					this.color = p5.random(0, 200);
+				}
+			}
+		}]);
+
+		return Piece;
+	}();
+
+	exports.default = Piece;
 
 /***/ }
 /******/ ]);

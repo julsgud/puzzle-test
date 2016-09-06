@@ -14,7 +14,7 @@ const sketch = (p5) => {
 	// state
 	let solved;
 
-	// puzzle parts
+	// board parts
 	let board;
 	let boardX, boardY;
 	let columns = 3, rows = 3;
@@ -43,21 +43,21 @@ const sketch = (p5) => {
 			boardSize = p5.width;
 			boardX = 0;
 			boardY = frameY;
-			pieceSize = boardSize/pieceCount;
+			pieceSize = boardSize/columns;
 
 			// generate piece locations
+			let index = 0;
 			for(var gridY = 0; gridY < columns; gridY++) {
 				for(var gridX = 0; gridX < rows; gridX++) {
 
-					let x = boardSize/pieceCount * gridX + frameX;
-					let y = boardSize/pieceCount * gridY + frameY;
+					let x = boardSize/columns * gridX + frameX;
+					let y = boardSize/rows * gridY + frameY;
 
-					let currentLocation = (gridX+1) * (gridY+1);
-
-					pieceLocations[currentLocation] = new Object;
-					pieceLocations[currentLocation].x = x;
-					pieceLocations[currentLocation].y = y;
-					// console.log("location " + currentLocation + " x: " + pieceLocations[currentLocation].x + " y: " + pieceLocations[currentLocation].y);
+					pieceLocations[index] = new Object;
+					pieceLocations[index].x = x;
+					pieceLocations[index].y = y;
+					// console.log("location " + index + " x: " + pieceLocations[index].x + " y: " + pieceLocations[index].y);
+					index++;
 				}
 			}
 		} else {
@@ -68,23 +68,27 @@ const sketch = (p5) => {
 		// init objects
 		board = new Board(boardX, boardY, boardSize, boardColor);
 		for(var i = 0; i < pieces.length; i++) {
-			pieces[i] = new Piece(i, pieceSize);
-			console.log(pieces[i]);
+			pieces[i] = new Piece(i, pieceSize, pieceLocations[i]);
 		}
 	}
 
 	p5.draw = () => {
 		p5.background(p5.color(252, 182, 157), 35);
 		board.display();
-		console.log(pieceLocations);
+
 		pieces.forEach(function(p) {
 			p.display(pieceLocations);
 		});
 	}
 
-	p5.mousePressed = () => {
-		click.x = p5.mouseX;
-		click.y = p5.mouseY;
+	p5.mouseReleased = () => {
+		clickCheck(p5.mouseX, p5.mouseY);
+	}
+
+
+	function clickCheck(x, y) {
+		// check if mouse/touch is inside piece
+		pieces.forEach(p => p.isClicked(x, y));
 	}
 }
 
