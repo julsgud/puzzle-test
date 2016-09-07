@@ -1,9 +1,12 @@
-export default class Piece {
+import Piece from './Piece';
+
+export default class GhostPiece extends Piece {
 	constructor(i, realIndex, size, location) {
-		this.currentIndex = i;
+		super(i, realIndex, size, location);
+		this.index = i;
 		this.realIndex = realIndex;
 		this.size = size;
-		this.color = p5.random(0, 200);
+		this.color = 255;
 		this.position = p5.createVector(location.x, location.y);
 
 		// use index to load image and sound to piece
@@ -14,35 +17,15 @@ export default class Piece {
 		p5.rect(this.position.x, this.position.y, this.size, this.size);
 	}
 
-	update() {
-		
-	}
+	move() {
+		// let destination = p5.createVector(to.x, to.y);
+		// check if there is an adjacent empty space
 
-	move(to) {
-		let destination = p5.createVector(to.x, to.y);
-
-		this.position.add(destination);
-		console.log(this.position);
+		// move by adding vectors
 	}
 
 	isClicked(x, y) {
 		if(x >= this.position.x && x <= this.position.x + this.size && y >= this.position.y && y <= this.position.y + this.size) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	getRealIndex() {
-		return this.realIndex;
-	}
-
-	getPosition() {
-		return this.position;
-	}
-
-	isAdjacentToGhostPiece(ghostPiece) {
-		if(p5.dist(this.position.x, this.position.y, ghostPiece.x, ghostPiece.y).toFixed(4) === this.size.toFixed(4)) {
 			return true;
 		} else {
 			return false;
