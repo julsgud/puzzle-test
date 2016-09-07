@@ -54,9 +54,9 @@
 
 	__webpack_require__(3);
 
-	var _Board = __webpack_require__(4);
+	var _Puzzle = __webpack_require__(4);
 
-	var _Board2 = _interopRequireDefault(_Board);
+	var _Puzzle2 = _interopRequireDefault(_Puzzle);
 
 	var _Piece = __webpack_require__(5);
 
@@ -69,92 +69,87 @@
 		window.p5 = p5;
 
 		// palette
-		var boardColor = void 0,
+		var puzzleColor = void 0,
 		    pieceColor = void 0;
 
 		// state
 		var solved = void 0;
 
-		// puzzle parts
-		var board = void 0;
-		var boardX = void 0,
-		    boardY = void 0;
-		var columns = 3,
-		    rows = 3;
-		var pieceCount = 8;
-		var pieces = new Array(pieceCount);
-		var boardSize = void 0,
-		    pieceSize = void 0;
-
-		// layout
-		var frameX = void 0,
-		    frameY = void 0;
-		var pieceLocations = new Array(9);
-
-		// interactivity
-		var click = {};
+		// components
+		var puzzle = void 0;
+		var spaces = 9;
 
 		p5.setup = function () {
 			p5.createCanvas(p5.windowWidth, p5.windowHeight);
-			boardColor = p5.color(255);
-			pieceColor = p5.color(155);
 
-			// determine sizes and layout based on window w and h
-			// todo: draw small square for desktop views
+			var layout = {};
+
 			if (p5.width <= p5.height) {
-				// when window is portrait or square...
-				frameX = 0;
-				frameY = (p5.height - p5.width) / 2;
-				boardSize = p5.width;
-				boardX = 0;
-				boardY = frameY;
-				pieceSize = boardSize / columns;
-
-				// generate piece locations
-				var index = 0;
-				for (var gridY = 0; gridY < columns; gridY++) {
-					for (var gridX = 0; gridX < rows; gridX++) {
-
-						var x = boardSize / columns * gridX + frameX;
-						var y = boardSize / rows * gridY + frameY;
-
-						pieceLocations[index] = new Object();
-						pieceLocations[index].x = x;
-						pieceLocations[index].y = y;
-						// console.log("location " + index + " x: " + pieceLocations[index].x + " y: " + pieceLocations[index].y);
-						index++;
-					}
-				}
+				layout = initPortrait(p5.width, p5.height, spaces);
 			} else {
-				// landscape
-				boardSize = p5.height;
+				layout = initLandscape(p5.width, p5.height, spaces);
 			}
 
 			// init objects
-			board = new _Board2.default(boardX, boardY, boardSize, boardColor);
-			for (var i = 0; i < pieces.length; i++) {
-				pieces[i] = new _Piece2.default(i, pieceSize, pieceLocations[i]);
-			}
+			puzzle = new _Puzzle2.default(layout);
 		};
 
 		p5.draw = function () {
 			p5.background(p5.color(252, 182, 157), 35);
-			board.display();
-
-			pieces.forEach(function (p) {
-				p.display(pieceLocations);
-			});
+			puzzle.display();
 		};
 
-		p5.mousePressed = function () {
-			checkDistance(p5.mouseX, p5.mouseY);
+		p5.mouseReleased = function () {
+			clickCheck(p5.mouseX, p5.mouseY);
 		};
 
-		function checkDistance(x, y) {
+		function clickCheck(x, y) {
 			// check if mouse/touch is inside piece
 			pieces.forEach(function (p) {
 				return p.isClicked(x, y);
 			});
+		}
+
+		function initPortrait(w, h, spaces) {
+			var that = {};
+
+			// layout variables
+			that.frameX = 0;
+			that.frameY = (h - w) / 2;
+			that.puzzleSize = w;
+			that.x = 0;
+			that.y = that.frameY;
+			that.pieceSize = that.puzzleSize / Math.sqrt(spaces);
+			that.pieceLocations = getPieceLocations(spaces, that.frameX, that.frameY, that.puzzleSize);
+
+			return that;
+		}
+
+		function initLandscape(w, h, puzzleSize) {
+			var that = {};
+
+			return that;
+		}
+
+		function getPieceLocations(spaces, frameX, frameY, puzzleSize) {
+			var locations = new Array(spaces);
+			var line = Math.sqrt(spaces);
+
+			var index = 0;
+			for (var gridY = 0; gridY < line; gridY++) {
+				for (var gridX = 0; gridX < line; gridX++) {
+
+					var x = puzzleSize / line * gridX + frameX;
+					var y = puzzleSize / line * gridY + frameY;
+
+					locations[index] = new Object();
+					locations[index].x = x;
+					locations[index].y = y;
+					// console.log("location " + index + " x: " + locations[index].x + " y: " + locations[index].y);
+					index++;
+				}
+			}
+			return locations;
 		}
 	};
 
@@ -43132,9 +43127,9 @@
 
 /***/ },
 /* 4 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 		value: true
@@ -43142,31 +43137,59 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+	var _Piece = __webpack_require__(5);
+
+	var _Piece2 = _interopRequireDefault(_Piece);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-	var Board = function () {
-		function Board(x, y, size, color) {
-			_classCallCheck(this, Board);
+	var Puzzle = function () {
+		function Puzzle(layout) {
+			_classCallCheck(this, Puzzle);
 
-			this.x = x;
-			this.y = y;
-			this.size = size;
-			this.color = color;
+			this.x = layout.x;
+			this.y = layout.y;
+			this.size = layout.puzzleSize;
+			this.pieceLocations = layout.pieceLocations;
+
+			if (pieceLocations) {
+				this.pieces = this.createPieces(this.pieceLocations, layout.pieceSize);
+			}
 		}
 
-		_createClass(Board, [{
-			key: "display",
+		_createClass(Puzzle, [{
+			key: 'display',
 			value: function display() {
-				p5.noStroke();
+				this.displayBoard();
+			}
+		}, {
+			key: 'displayBoard',
+			value: function displayBoard() {
 				p5.fill(255);
+				p5.noStroke();
 				p5.rect(this.x, this.y, this.size, this.size);
+			}
+		}, {
+			key: 'createPieces',
+			value: function createPieces(pieceLocations, pieceSize) {
+				var pieces = new Array(pieceLocations.length);
+
+				for (var i = 0; i < pieceLocations.length; i++) {
+					if (i = 4) {
+						pieces[i] = new _Piece2.default(i, pieceSize);
+					} else {
+						pieces[i] = new _Piece2.default(i, pieceSize);
+					}
+				}
 			}
 		}]);
 
-		return Board;
+		return Puzzle;
 	}();
 
-	exports.default = Board;
+	exports.default = Puzzle;
 
 /***/ },
 /* 5 */
@@ -43183,7 +43206,7 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Piece = function () {
-		function Piece(i, size, location) {
+		function Piece(i, size) {
 			_classCallCheck(this, Piece);
 
 			this.index = i;
@@ -43203,7 +43226,10 @@
 		}, {
 			key: "move",
 			value: function move() {
-				var destination = p5.createVector(to.x, to.y);
+				// let destination = p5.createVector(to.x, to.y);
+				// check if there is an adjacent empty space
+
+				// move by adding vectors
 			}
 		}, {
 			key: "click",
