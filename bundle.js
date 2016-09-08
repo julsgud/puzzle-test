@@ -62,15 +62,15 @@
 
 	var _Piece2 = _interopRequireDefault(_Piece);
 
+	var _Helpers = __webpack_require__(7);
+
+	var _Helpers2 = _interopRequireDefault(_Helpers);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var sketch = function sketch(p5) {
 		// make library globally available
 		window.p5 = p5;
-
-		// palette
-		var puzzleColor = void 0,
-		    pieceColor = void 0;
 
 		// state
 		var solved = void 0;
@@ -85,9 +85,9 @@
 			var layout = {};
 
 			if (p5.width <= p5.height) {
-				layout = initPortrait(p5.width, p5.height, spaces);
+				layout = _Helpers2.default.initPortrait(p5.width, p5.height, spaces);
 			} else {
-				layout = initLandscape(p5.width, p5.height, spaces);
+				layout = _Helpers2.default.initLandscape(p5.width, p5.height, spaces);
 			}
 
 			// init objects
@@ -99,58 +99,10 @@
 			puzzle.display();
 		};
 
-		p5.mouseReleased = function () {
-			clickCheck(p5.mouseX, p5.mouseY);
+		p5.mouseClicked = function () {
+			// todo: only fire when in bound of board
+			puzzle.clickCheck(p5.mouseX, p5.mouseY);
 		};
-
-		function clickCheck(x, y) {
-			// check if mouse/touch is inside piece
-			pieces.forEach(function (p) {
-				return p.isClicked(x, y);
-			});
-		}
-
-		function initPortrait(w, h, spaces) {
-			var that = {};
-
-			// layout variables
-			that.frameX = 0;
-			that.frameY = (h - w) / 2;
-			that.puzzleSize = w;
-			that.x = 0;
-			that.y = that.frameY;
-			that.pieceSize = that.puzzleSize / Math.sqrt(spaces);
-			that.pieceLocations = getPieceLocations(spaces, that.frameX, that.frameY, that.puzzleSize);
-
-			return that;
-		}
-
-		function initLandscape(w, h, puzzleSize) {
-			var that = {};
-
-			return that;
-		}
-
-		function getPieceLocations(spaces, frameX, frameY, puzzleSize) {
-			var locations = new Array(spaces);
-			var line = Math.sqrt(spaces);
-
-			var index = 0;
-			for (var gridY = 0; gridY < line; gridY++) {
-				for (var gridX = 0; gridX < line; gridX++) {
-
-					var x = puzzleSize / line * gridX + frameX;
-					var y = puzzleSize / line * gridY + frameY;
-
-					locations[index] = new Object();
-					locations[index].x = x;
-					locations[index].y = y;
-					// console.log("location " + index + " x: " + locations[index].x + " y: " + locations[index].y);
-					index++;
-				}
-			}
-			return locations;
-		}
 	};
 
 	new _p2.default(sketch);
@@ -43141,6 +43093,14 @@
 
 	var _Piece2 = _interopRequireDefault(_Piece);
 
+	var _GhostPiece = __webpack_require__(6);
+
+	var _GhostPiece2 = _interopRequireDefault(_GhostPiece);
+
+	var _Helpers = __webpack_require__(7);
+
+	var _Helpers2 = _interopRequireDefault(_Helpers);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -43153,16 +43113,17 @@
 			this.y = layout.y;
 			this.size = layout.puzzleSize;
 			this.pieceLocations = layout.pieceLocations;
-
-			if (pieceLocations) {
-				this.pieces = this.createPieces(this.pieceLocations, layout.pieceSize);
-			}
+			this.ghostPieceIndex = null;
+			this.pieces = this.createPieces(this.pieceLocations, layout.pieceSize);
 		}
 
 		_createClass(Puzzle, [{
 			key: 'display',
 			value: function display() {
 				this.displayBoard();
+				this.pieces.forEach(function (p) {
+					return p.display();
+				});
 			}
 		}, {
 			key: 'displayBoard',
@@ -43175,15 +43136,70 @@
 			key: 'createPieces',
 			value: function createPieces(pieceLocations, pieceSize) {
 				var pieces = new Array(pieceLocations.length);
+				var randomIndices = _Helpers2.default.generateRandomIndices(pieceLocations.length);
+				// console.log(randomIndices);
 
 				for (var i = 0; i < pieceLocations.length; i++) {
-					if (i = 4) {
-						pieces[i] = new _Piece2.default(i, pieceSize);
+					if (randomIndices[i] === 8) {
+						this.ghostPieceIndex = i;
+						pieces[i] = new _GhostPiece2.default(i, pieces.length - 1, pieceSize, pieceLocations[i]);
 					} else {
-						pieces[i] = new _Piece2.default(i, pieceSize);
+						pieces[i] = new _Piece2.default(i, randomIndices[i], pieceSize, pieceLocations[i]);
 					}
 				}
+
+				return pieces;
 			}
+		}, {
+			key: 'clickCheck',
+			value: function clickCheck(x, y) {
+
+				// 1. get index of clicked piece
+				var indexOfClickedPiece = _Helpers2.default.getIndexOfClickedPiece(this.pieces, x, y);
+				console.log(indexOfClickedPiece);
+
+				// 2. get index of ghost piece
+				var indexOfGhostPiece = _Helpers2.default.getIndexOfGhostPiece(this.pieces, _GhostPiece2.default);
+				console.log(ghostPieceCheck);
+
+				// 3. if piece is not ghost piece, check if it can move
+				var canMove = _Helpers2.default.canMove(pieces, indexOfClickedPiece, indexOfGhostPiece);
+
+				// if piece other than ghost piece is clicked, check if it can move
+				// let canMove = false;
+				// if (this.pieces[clickedIndex].getRealIndex() < this.pieces.length-1) {
+				// 	// TODO: disable click check until move is complete
+				// 	// console.log('ghost piece at ' + this.ghostPieceIndex);
+				// 	ghostPieceLocation = this.pieces[this.ghostPieceIndex].getPosition();
+				// 	canMove = this.pieces[clickedIndex].isAdjacentToGhostPiece(ghostPieceLocation);
+				// } else {
+				// 	// TODO: tell peeps to click on an image
+				// 	// console.log('ghost piece');
+				// }
+
+				// move when true
+				// if (canMove) { 
+				// 	// move
+				// 	// let movingPieceLocation = this.pieces[clickedIndex].getPosition();
+				// 	// this.pieces[clickedIndex].move(ghostPieceLocation);
+				// 	// this.pieces[this.ghostPieceIndex].move(movingPieceLocation);
+
+				// 	// then swap element in array
+				// 	// console.log(this.pieces.length);
+				// 	// let movingPiece = this.pieces.splice(clickedIndex, 1);
+				// 	// console.log(movingPiece + ' ' + this.pieces.length);
+				// 	// let ghostPiece = this.pieces.splice(this.ghostPieceIndex - 1, 1);
+				// 	// console.log(ghostPiece);
+
+				// 	console.log('can move');
+				// } else {
+
+				// 	console.log('cant move');
+				// }
+			}
+		}, {
+			key: 'isPieceAdjacentToGhostPiece',
+			value: function isPieceAdjacentToGhostPiece() {}
 		}]);
 
 		return Puzzle;
@@ -43206,10 +43222,11 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Piece = function () {
-		function Piece(i, size) {
+		function Piece(i, realIndex, size, location) {
 			_classCallCheck(this, Piece);
 
-			this.index = i;
+			this.currentIndex = i;
+			this.realIndex = realIndex;
 			this.size = size;
 			this.color = p5.random(0, 200);
 			this.position = p5.createVector(location.x, location.y);
@@ -43224,23 +43241,42 @@
 				p5.rect(this.position.x, this.position.y, this.size, this.size);
 			}
 		}, {
-			key: "move",
-			value: function move() {
-				// let destination = p5.createVector(to.x, to.y);
-				// check if there is an adjacent empty space
-
-				// move by adding vectors
-			}
+			key: "update",
+			value: function update() {}
 		}, {
-			key: "click",
-			value: function click() {
-				this.color = p5.random(0, 200);
+			key: "move",
+			value: function move(to) {
+				var destination = p5.createVector(to.x, to.y);
+
+				this.position.add(destination);
+				console.log(this.position);
 			}
 		}, {
 			key: "isClicked",
 			value: function isClicked(x, y) {
 				if (x >= this.position.x && x <= this.position.x + this.size && y >= this.position.y && y <= this.position.y + this.size) {
-					this.color = p5.random(0, 200);
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}, {
+			key: "getRealIndex",
+			value: function getRealIndex() {
+				return this.realIndex;
+			}
+		}, {
+			key: "getPosition",
+			value: function getPosition() {
+				return this.position;
+			}
+		}, {
+			key: "isAdjacentToGhostPiece",
+			value: function isAdjacentToGhostPiece(ghostPiece) {
+				if (p5.dist(this.position.x, this.position.y, ghostPiece.x, ghostPiece.y).toFixed(4) === this.size.toFixed(4)) {
+					return true;
+				} else {
+					return false;
 				}
 			}
 		}]);
@@ -43249,6 +43285,181 @@
 	}();
 
 	exports.default = Piece;
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _Piece2 = __webpack_require__(5);
+
+	var _Piece3 = _interopRequireDefault(_Piece2);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var GhostPiece = function (_Piece) {
+		_inherits(GhostPiece, _Piece);
+
+		function GhostPiece(i, realIndex, size, location) {
+			_classCallCheck(this, GhostPiece);
+
+			var _this = _possibleConstructorReturn(this, (GhostPiece.__proto__ || Object.getPrototypeOf(GhostPiece)).call(this, i, realIndex, size, location));
+
+			_this.index = i;
+			_this.realIndex = realIndex;
+			_this.size = size;
+			_this.color = 255;
+			_this.position = p5.createVector(location.x, location.y);
+
+			// use index to load image and sound to piece
+			return _this;
+		}
+
+		_createClass(GhostPiece, [{
+			key: 'display',
+			value: function display(pieceLocations) {
+				p5.fill(this.color);
+				p5.rect(this.position.x, this.position.y, this.size, this.size);
+			}
+		}, {
+			key: 'move',
+			value: function move() {
+				// let destination = p5.createVector(to.x, to.y);
+				// check if there is an adjacent empty space
+
+				// move by adding vectors
+			}
+		}, {
+			key: 'isClicked',
+			value: function isClicked(x, y) {
+				if (x >= this.position.x && x <= this.position.x + this.size && y >= this.position.y && y <= this.position.y + this.size) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}]);
+
+		return GhostPiece;
+	}(_Piece3.default);
+
+	exports.default = GhostPiece;
+
+/***/ },
+/* 7 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+	var Helpers = {
+		initPortrait: function initPortrait(w, h, spaces) {
+			var that = {};
+
+			// layout variables
+			that.frameX = 0;
+			that.frameY = (h - w) / 2;
+			that.puzzleSize = w;
+			that.x = 0;
+			that.y = that.frameY;
+			that.pieceSize = that.puzzleSize / Math.sqrt(spaces);
+			that.pieceLocations = this.getPieceLocations(spaces, that.frameX, that.frameY, that.puzzleSize);
+
+			return that;
+		},
+
+		initLandscape: function initLandscape(w, h, puzzleSize) {
+			var that = {};
+
+			return that;
+		},
+
+		getPieceLocations: function getPieceLocations(spaces, frameX, frameY, puzzleSize) {
+			var locations = new Array(spaces);
+			var line = Math.sqrt(spaces);
+
+			var index = 0;
+			for (var gridY = 0; gridY < line; gridY++) {
+				for (var gridX = 0; gridX < line; gridX++) {
+
+					var x = puzzleSize / line * gridX + frameX;
+					var y = puzzleSize / line * gridY + frameY;
+
+					locations[index] = new Object();
+					locations[index].x = x;
+					locations[index].y = y;
+					// console.log("location " + index + " x: " + locations[index].x + " y: " + locations[index].y);
+					index++;
+				}
+			}
+			return locations;
+		},
+
+		generateRandomIndices: function generateRandomIndices(size) {
+			var nums = new Array(size),
+			    n = 0;
+			var i = nums.length,
+			    j = 0,
+			    temp = void 0;
+
+			while (n < size) {
+				nums[n] = n;
+				n++;
+			}
+
+			while (i--) {
+				j = Math.floor(Math.random() * (i + 1));
+				temp = nums[i];
+				nums[i] = nums[j];
+				nums[j] = temp;
+			}
+
+			return nums;
+		},
+
+		getIndexOfClickedPiece: function getIndexOfClickedPiece(pieces, x, y) {
+			var index = void 0,
+			    i = 0,
+			    current = false;
+
+			while (i < pieces.length && !current) {
+				current = pieces[i].isClicked(x, y);
+				if (current) index = i;
+				i++;
+			}
+
+			return index;
+		},
+		getIndexOfGhostPiece: function getIndexOfGhostPiece(pieces, GhostPiece) {
+			var i = 0,
+			    bool = false;
+
+			while (i < pieces.length && !bool) {
+				bool = pieces[i] instanceof GhostPiece;
+				i++;
+			}
+
+			return bool;
+		},
+		canMove: function canMove() {}
+	};
+
+	exports.default = Helpers;
 
 /***/ }
 /******/ ]);
