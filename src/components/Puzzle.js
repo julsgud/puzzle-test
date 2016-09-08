@@ -41,48 +41,33 @@ export default class Puzzle {
 		return pieces;
 	}
 
-	clickCheck(x, y) {
-		let ghostPieceLocation;
+	movePiece(x, y) {
 
-		// get index of clicked piece
-		let p = 0, clickedIndex = null, current = null;
-		while(p < this.pieces.length && !current) {
-			let current = this.pieces[p].isClicked(x, y);
-			if (current) clickedIndex = p; 
-			p++;
-		}
+		// 1. get index of clicked piece
+		let indexOfClickedPiece = Helpers.getIndexOfClickedPiece(this.pieces, x, y);
+		// console.log(indexOfClickedPiece);
 
-		// if piece other than ghost piece is clicked, check if it can move
-		let canMove = false;
-		if (this.pieces[clickedIndex].getRealIndex() < this.pieces.length-1) {
-			// TODO: disable click check until move is complete
-			// console.log('ghost piece at ' + this.ghostPieceIndex);
-			ghostPieceLocation = this.pieces[this.ghostPieceIndex].getPosition();
-			canMove = this.pieces[clickedIndex].isAdjacentToGhostPiece(ghostPieceLocation);
+		// 2. get index of ghost piece
+		let indexOfGhostPiece = Helpers.getIndexOfGhostPiece(this.pieces, GhostPiece);
+		// console.log(indexOfGhostPiece);
+
+		// 3. if piece is not ghost piece, check if it can move
+		let canMove = Helpers.canPieceMove(this.pieces, indexOfClickedPiece, indexOfGhostPiece);
+		// console.log(canMove);
+
+		
+		if (canMove) {
+			// 4. swap locations
+			this.pieces(indexOfClickedPiece).move(this.pieces[indexOfGhostPiece].getPosition());
+			this.pieces(indexOfGhostPiece).move(this.pieces[indexOfClickedPiece].getPosition());
+			// 5. swap position in array
 		} else {
-			// TODO: tell peeps to click on an image
-			// console.log('ghost piece');
+			// try again
 		}
 
-		// move when true
-		if (canMove) { 
-			// move
-			// let movingPieceLocation = this.pieces[clickedIndex].getPosition();
-			// this.pieces[clickedIndex].move(ghostPieceLocation);
-			// this.pieces[this.ghostPieceIndex].move(movingPieceLocation);
+		
 
-			// then swap element in array
-			console.log(this.pieces.length);
-			let movingPiece = this.pieces.splice(clickedIndex, 1);
-			console.log(movingPiece + ' ' + this.pieces.length);
-			let ghostPiece = this.pieces.splice(this.ghostPieceIndex - 1, 1);
-			console.log(ghostPiece);
 
-			console.log('can move');
-		} else {
-
-			console.log('cant move');
-		}
 	}
 
 	isPieceAdjacentToGhostPiece() {

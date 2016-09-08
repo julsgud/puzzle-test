@@ -41,14 +41,17 @@ const Helpers = {
 		return locations;
 	},
 
-	generateRandomIndices: function(size) {
-		let nums = new Array(size), n=0;
-		let i = nums.length, j = 0, temp;
+	generateRandomIndices: function(sizeOfArray) {
+		// create array with numbers
+		let nums = new Array(sizeOfArray), n=0;
 
-		while(n < size) {
+		while(n < sizeOfArray) {
 			nums[n] = n;
 			n++;
 		}
+
+		// shuffle 'em
+		let i = nums.length, j = 0, temp;
 
 		while(i--) {
 			j = Math.floor(Math.random() * (i+1));
@@ -58,6 +61,40 @@ const Helpers = {
 		}
 
 		return nums;
+	},
+
+	getIndexOfClickedPiece(pieces, x, y) {
+		let index, i = 0, current = false;
+
+		while(i < pieces.length && !current) {
+			current = pieces[i].wasClicked(x, y);
+			if(current) index = i;
+			i++
+		}
+
+		return index;
+	},
+
+	getIndexOfGhostPiece(pieces, GhostPiece) {
+		let index, i = 0, bool = false;
+
+		while(i < pieces.length && !bool) {
+			bool = pieces[i] instanceof GhostPiece;
+			if (bool) index = i;
+			i++;
+		}
+
+		return index;
+	},
+
+	canPieceMove(pieces, clickedPiece, ghostPiece) {
+		let canMove = false;
+
+		if(clickedPiece != ghostPiece) {
+			canMove = pieces[clickedPiece].isAdjacentToGhostPiece(pieces[ghostPiece].getPosition());
+		} 
+
+		return canMove;
 	}
 }
 

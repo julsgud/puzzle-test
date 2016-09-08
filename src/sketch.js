@@ -37,8 +37,8 @@ const sketch = (p5) => {
 	}
 
 	p5.mouseClicked = () => {
-		// todo: only fire when in bound of board
-		puzzle.clickCheck(p5.mouseX, p5.mouseY);
+		// todo: only fire when in-bounds of board
+		puzzle.movePiece(p5.mouseX, p5.mouseY);
 	}	
 }
 
