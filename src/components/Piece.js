@@ -8,27 +8,50 @@ export default class Piece {
 		this.position = p5.createVector(location.x, location.y);
 
 		// movement
-		this.moving = false;
-		this.target = p5.createVector(0, 0);
-		this.direction = p5.createVector(0, 0);
-		this.velocity = p5.createVector(0, 0);
+		this.resetMovement();
+
+		// reset vector
+		this.initVector = p5.createVector(0, 0);
 
 		// use index to load image and sound to piece
 	}
 
 	display(pieceLocations) {
-		if (moving) update();
+		if (this.moving) this.update();
 		p5.fill(this.color);
 		p5.rect(this.position.x, this.position.y, this.size, this.size);
 	}
 
 	update() {
-		
+		this.velocity.add(this.acceleration);
+		this.velocity.limit(2);
+		this.position.add(this.velocity);
+
+		if(this.position.x == this.target.x) {
+			console.log('bam');
+		} else {
+			console.log('doy');
+		}
+		console.log(this.position.x);
+		console.log(this.target.x);
+		if(this.position.equals(this.target)) {
+			this.resetMovement();
+		}
 	}
 
-	move(to) {
-		// change helper vectors
-		// set moving to true
+	move(destination) {
+		// 1. update helper vectors
+		console.log(destination.x + ' ' + destination.y);
+		this.target = destination;
+		console.log(this.target.x + ' ' + this.target.y);
+		this.direction = this.target.sub(this.position);
+		console.log(this.target.x + ' ' + this.target.y);
+		this.direction.normalize();
+		this.direction.mult(0.5);
+		this.acceleration = this.direction;
+
+		// 2. start moving
+		this.moving = true;
 	}
 
 	wasClicked(x, y) {
@@ -53,5 +76,13 @@ export default class Piece {
 		} else {
 			return false;
 		}
+	}
+
+	resetMovement() {
+		this.moving = false;
+		this.target = p5.createVector(0, 0);
+		this.direction = p5.createVector(0, 0);
+		this.velocity = p5.createVector(0, 0);
+		this.acceleration = p5.createVector(0, 0);
 	}
 }

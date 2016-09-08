@@ -100,8 +100,8 @@
 		};
 
 		p5.mouseClicked = function () {
-			// todo: only fire when in bound of board
-			puzzle.clickCheck(p5.mouseX, p5.mouseY);
+			// todo: only fire when in-bounds of board
+			puzzle.movePiece(p5.mouseX, p5.mouseY);
 		};
 	};
 
@@ -43151,51 +43151,30 @@
 				return pieces;
 			}
 		}, {
-			key: 'clickCheck',
-			value: function clickCheck(x, y) {
+			key: 'movePiece',
+			value: function movePiece(x, y) {
 
 				// 1. get index of clicked piece
 				var indexOfClickedPiece = _Helpers2.default.getIndexOfClickedPiece(this.pieces, x, y);
-				console.log(indexOfClickedPiece);
+				// console.log(indexOfClickedPiece);
 
 				// 2. get index of ghost piece
 				var indexOfGhostPiece = _Helpers2.default.getIndexOfGhostPiece(this.pieces, _GhostPiece2.default);
-				console.log(ghostPieceCheck);
+				// console.log(indexOfGhostPiece);
 
 				// 3. if piece is not ghost piece, check if it can move
-				var canMove = _Helpers2.default.canMove(pieces, indexOfClickedPiece, indexOfGhostPiece);
+				var canMove = _Helpers2.default.canPieceMove(this.pieces, indexOfClickedPiece, indexOfGhostPiece);
+				// console.log(canMove);
 
-				// if piece other than ghost piece is clicked, check if it can move
-				// let canMove = false;
-				// if (this.pieces[clickedIndex].getRealIndex() < this.pieces.length-1) {
-				// 	// TODO: disable click check until move is complete
-				// 	// console.log('ghost piece at ' + this.ghostPieceIndex);
-				// 	ghostPieceLocation = this.pieces[this.ghostPieceIndex].getPosition();
-				// 	canMove = this.pieces[clickedIndex].isAdjacentToGhostPiece(ghostPieceLocation);
-				// } else {
-				// 	// TODO: tell peeps to click on an image
-				// 	// console.log('ghost piece');
-				// }
 
-				// move when true
-				// if (canMove) { 
-				// 	// move
-				// 	// let movingPieceLocation = this.pieces[clickedIndex].getPosition();
-				// 	// this.pieces[clickedIndex].move(ghostPieceLocation);
-				// 	// this.pieces[this.ghostPieceIndex].move(movingPieceLocation);
-
-				// 	// then swap element in array
-				// 	// console.log(this.pieces.length);
-				// 	// let movingPiece = this.pieces.splice(clickedIndex, 1);
-				// 	// console.log(movingPiece + ' ' + this.pieces.length);
-				// 	// let ghostPiece = this.pieces.splice(this.ghostPieceIndex - 1, 1);
-				// 	// console.log(ghostPiece);
-
-				// 	console.log('can move');
-				// } else {
-
-				// 	console.log('cant move');
-				// }
+				if (canMove) {
+					// 4. swap locations
+					this.pieces(indexOfClickedPiece).move(this.pieces[indexOfGhostPiece].getPosition());
+					this.pieces(indexOfGhostPiece).move(this.pieces[indexOfClickedPiece].getPosition());
+					// 5. swap position in array
+				} else {
+						// try again
+					}
 			}
 		}, {
 			key: 'isPieceAdjacentToGhostPiece',
@@ -43225,11 +43204,18 @@
 		function Piece(i, realIndex, size, location) {
 			_classCallCheck(this, Piece);
 
+			//
 			this.currentIndex = i;
 			this.realIndex = realIndex;
 			this.size = size;
 			this.color = p5.random(0, 200);
 			this.position = p5.createVector(location.x, location.y);
+
+			// movement
+			this.moving = false;
+			this.target = p5.createVector(0, 0);
+			this.direction = p5.createVector(0, 0);
+			this.velocity = p5.createVector(0, 0);
 
 			// use index to load image and sound to piece
 		}
@@ -43237,6 +43223,7 @@
 		_createClass(Piece, [{
 			key: "display",
 			value: function display(pieceLocations) {
+				if (moving) update();
 				p5.fill(this.color);
 				p5.rect(this.position.x, this.position.y, this.size, this.size);
 			}
@@ -43246,14 +43233,12 @@
 		}, {
 			key: "move",
 			value: function move(to) {
-				var destination = p5.createVector(to.x, to.y);
-
-				this.position.add(destination);
-				console.log(this.position);
+				// change helper vectors
+				// set moving to true
 			}
 		}, {
-			key: "isClicked",
-			value: function isClicked(x, y) {
+			key: "wasClicked",
+			value: function wasClicked(x, y) {
 				if (x >= this.position.x && x <= this.position.x + this.size && y >= this.position.y && y <= this.position.y + this.size) {
 					return true;
 				} else {
@@ -43410,17 +43395,20 @@
 			return locations;
 		},
 
-		generateRandomIndices: function generateRandomIndices(size) {
-			var nums = new Array(size),
+		generateRandomIndices: function generateRandomIndices(sizeOfArray) {
+			// create array with numbers
+			var nums = new Array(sizeOfArray),
 			    n = 0;
-			var i = nums.length,
-			    j = 0,
-			    temp = void 0;
 
-			while (n < size) {
+			while (n < sizeOfArray) {
 				nums[n] = n;
 				n++;
 			}
+
+			// shuffle 'em
+			var i = nums.length,
+			    j = 0,
+			    temp = void 0;
 
 			while (i--) {
 				j = Math.floor(Math.random() * (i + 1));
@@ -43438,7 +43426,7 @@
 			    current = false;
 
 			while (i < pieces.length && !current) {
-				current = pieces[i].isClicked(x, y);
+				current = pieces[i].wasClicked(x, y);
 				if (current) index = i;
 				i++;
 			}
@@ -43446,17 +43434,27 @@
 			return index;
 		},
 		getIndexOfGhostPiece: function getIndexOfGhostPiece(pieces, GhostPiece) {
-			var i = 0,
+			var index = void 0,
+			    i = 0,
 			    bool = false;
 
 			while (i < pieces.length && !bool) {
 				bool = pieces[i] instanceof GhostPiece;
+				if (bool) index = i;
 				i++;
 			}
 
-			return bool;
+			return index;
 		},
-		canMove: function canMove() {}
+		canPieceMove: function canPieceMove(pieces, clickedPiece, ghostPiece) {
+			var canMove = false;
+
+			if (clickedPiece != ghostPiece) {
+				canMove = pieces[clickedPiece].isAdjacentToGhostPiece(pieces[ghostPiece].getPosition());
+			}
+
+			return canMove;
+		}
 	};
 
 	exports.default = Helpers;

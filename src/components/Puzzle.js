@@ -9,7 +9,6 @@ export default class Puzzle {
 		this.y = layout.y;
 		this.size = layout.puzzleSize;
 		this.pieceLocations = layout.pieceLocations;
-		this.ghostPieceIndex = null;
 		this.pieces = this.createPieces(this.pieceLocations, layout.pieceSize);
 	}
 
@@ -31,7 +30,6 @@ export default class Puzzle {
 
 		for (var i = 0; i < pieceLocations.length; i++) {
 			if (randomIndices[i] === 8) {
-				this.ghostPieceIndex = i;
 				pieces[i] = new GhostPiece(i, pieces.length-1, pieceSize, pieceLocations[i]);
 			} else {
 				pieces[i] = new Piece(i, randomIndices[i], pieceSize, pieceLocations[i]);
@@ -58,8 +56,8 @@ export default class Puzzle {
 		
 		if (canMove) {
 			// 4. swap locations
-			this.pieces(indexOfClickedPiece).move(this.pieces[indexOfGhostPiece].getPosition());
-			this.pieces(indexOfGhostPiece).move(this.pieces[indexOfClickedPiece].getPosition());
+			this.pieces[indexOfClickedPiece].move(this.pieces[indexOfGhostPiece].getPosition());
+			// this.pieces[indexOfGhostPiece].move(this.pieces[indexOfClickedPiece].getPosition());
 			// 5. swap position in array
 		} else {
 			// try again
