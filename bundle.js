@@ -43113,7 +43113,6 @@
 			this.y = layout.y;
 			this.size = layout.puzzleSize;
 			this.pieceLocations = layout.pieceLocations;
-			this.ghostPieceIndex = null;
 			this.pieces = this.createPieces(this.pieceLocations, layout.pieceSize);
 		}
 
@@ -43141,7 +43140,6 @@
 
 				for (var i = 0; i < pieceLocations.length; i++) {
 					if (randomIndices[i] === 8) {
-						this.ghostPieceIndex = i;
 						pieces[i] = new _GhostPiece2.default(i, pieces.length - 1, pieceSize, pieceLocations[i]);
 					} else {
 						pieces[i] = new _Piece2.default(i, randomIndices[i], pieceSize, pieceLocations[i]);
@@ -43169,8 +43167,8 @@
 
 				if (canMove) {
 					// 4. swap locations
-					this.pieces(indexOfClickedPiece).move(this.pieces[indexOfGhostPiece].getPosition());
-					this.pieces(indexOfGhostPiece).move(this.pieces[indexOfClickedPiece].getPosition());
+					this.pieces[indexOfClickedPiece].move(this.pieces[indexOfGhostPiece].getPosition());
+					// this.pieces[indexOfGhostPiece].move(this.pieces[indexOfClickedPiece].getPosition());
 					// 5. swap position in array
 				} else {
 						// try again
@@ -43190,7 +43188,7 @@
 /* 5 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 		value: true
@@ -43212,32 +43210,57 @@
 			this.position = p5.createVector(location.x, location.y);
 
 			// movement
-			this.moving = false;
-			this.target = p5.createVector(0, 0);
-			this.direction = p5.createVector(0, 0);
-			this.velocity = p5.createVector(0, 0);
+			this.resetMovement();
+
+			// reset vector
+			this.initVector = p5.createVector(0, 0);
 
 			// use index to load image and sound to piece
 		}
 
 		_createClass(Piece, [{
-			key: "display",
+			key: 'display',
 			value: function display(pieceLocations) {
-				if (moving) update();
+				if (this.moving) this.update();
 				p5.fill(this.color);
 				p5.rect(this.position.x, this.position.y, this.size, this.size);
 			}
 		}, {
-			key: "update",
-			value: function update() {}
-		}, {
-			key: "move",
-			value: function move(to) {
-				// change helper vectors
-				// set moving to true
+			key: 'update',
+			value: function update() {
+				this.velocity.add(this.acceleration);
+				this.velocity.limit(2);
+				this.position.add(this.velocity);
+
+				if (this.position.x == this.target.x) {
+					console.log('bam');
+				} else {
+					console.log('doy');
+				}
+				console.log(this.position.x);
+				console.log(this.target.x);
+				if (this.position.equals(this.target)) {
+					this.resetMovement();
+				}
 			}
 		}, {
-			key: "wasClicked",
+			key: 'move',
+			value: function move(destination) {
+				// 1. update helper vectors
+				console.log(destination.x + ' ' + destination.y);
+				this.target = destination;
+				console.log(this.target.x + ' ' + this.target.y);
+				this.direction = this.target.sub(this.position);
+				console.log(this.target.x + ' ' + this.target.y);
+				this.direction.normalize();
+				this.direction.mult(0.5);
+				this.acceleration = this.direction;
+
+				// 2. start moving
+				this.moving = true;
+			}
+		}, {
+			key: 'wasClicked',
 			value: function wasClicked(x, y) {
 				if (x >= this.position.x && x <= this.position.x + this.size && y >= this.position.y && y <= this.position.y + this.size) {
 					return true;
@@ -43246,23 +43269,32 @@
 				}
 			}
 		}, {
-			key: "getRealIndex",
+			key: 'getRealIndex',
 			value: function getRealIndex() {
 				return this.realIndex;
 			}
 		}, {
-			key: "getPosition",
+			key: 'getPosition',
 			value: function getPosition() {
 				return this.position;
 			}
 		}, {
-			key: "isAdjacentToGhostPiece",
+			key: 'isAdjacentToGhostPiece',
 			value: function isAdjacentToGhostPiece(ghostPiece) {
 				if (p5.dist(this.position.x, this.position.y, ghostPiece.x, ghostPiece.y).toFixed(4) === this.size.toFixed(4)) {
 					return true;
 				} else {
 					return false;
 				}
+			}
+		}, {
+			key: 'resetMovement',
+			value: function resetMovement() {
+				this.moving = false;
+				this.target = p5.createVector(0, 0);
+				this.direction = p5.createVector(0, 0);
+				this.velocity = p5.createVector(0, 0);
+				this.acceleration = p5.createVector(0, 0);
 			}
 		}]);
 
@@ -43280,8 +43312,6 @@
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
-
-	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	var _Piece2 = __webpack_require__(5);
 
@@ -43306,37 +43336,12 @@
 			_this.index = i;
 			_this.realIndex = realIndex;
 			_this.size = size;
-			_this.color = 255;
+			_this.color = '#3366cc';
 			_this.position = p5.createVector(location.x, location.y);
 
 			// use index to load image and sound to piece
 			return _this;
 		}
-
-		_createClass(GhostPiece, [{
-			key: 'display',
-			value: function display(pieceLocations) {
-				p5.fill(this.color);
-				p5.rect(this.position.x, this.position.y, this.size, this.size);
-			}
-		}, {
-			key: 'move',
-			value: function move() {
-				// let destination = p5.createVector(to.x, to.y);
-				// check if there is an adjacent empty space
-
-				// move by adding vectors
-			}
-		}, {
-			key: 'isClicked',
-			value: function isClicked(x, y) {
-				if (x >= this.position.x && x <= this.position.x + this.size && y >= this.position.y && y <= this.position.y + this.size) {
-					return true;
-				} else {
-					return false;
-				}
-			}
-		}]);
 
 		return GhostPiece;
 	}(_Piece3.default);
