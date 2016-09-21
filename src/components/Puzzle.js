@@ -40,7 +40,6 @@ export default class Puzzle {
 	}
 
 	movePiece(x, y) {
-
 		// 1. get index of clicked piece
 		let indexOfClickedPiece = Helpers.getIndexOfClickedPiece(this.pieces, x, y);
 		// console.log(indexOfClickedPiece);
@@ -52,7 +51,6 @@ export default class Puzzle {
 		// 3. if piece is not ghost piece, check if it can move
 		let canMove = Helpers.canPieceMove(this.pieces, indexOfClickedPiece, indexOfGhostPiece);
 		// console.log(canMove);
-
 		
 		if (canMove) {
 			// 4. swap locations
@@ -62,13 +60,5 @@ export default class Puzzle {
 		} else {
 			// try again
 		}
-
-		
-
-
-	}
-
-	isPieceAdjacentToGhostPiece() {
-
 	}
 }

@@ -1,17 +1,18 @@
 export default class Piece {
 	constructor(i, realIndex, size, location) {
-		//
+		
 		this.currentIndex = i;
 		this.realIndex = realIndex;
 		this.size = size;
 		this.color = p5.random(0, 200);
 		this.position = p5.createVector(location.x, location.y);
+		this.emptyVector = p5.createVector(0, 0);
 
 		// movement
 		this.resetMovement();
 
 		// reset vector
-		this.initVector = p5.createVector(0, 0);
+		this.emptyVector = p5.createVector(0, 0);
 
 		// use index to load image and sound to piece
 	}
@@ -27,28 +28,25 @@ export default class Piece {
 		this.velocity.limit(2);
 		this.position.add(this.velocity);
 
-		if(this.position.x == this.target.x) {
-			console.log('bam');
-		} else {
-			console.log('doy');
-		}
-		console.log(this.position.x);
-		console.log(this.target.x);
-		if(this.position.equals(this.target)) {
-			this.resetMovement();
+		if(this.position.x.toFixed(4) === this.target.x.toFixed(4)) {
+			console.log('woop');
+			this.acceleration.mult(0);
+			this.velocity.mult(0);
+			this.moving = false;
+			// this.resetMovement();
 		}
 	}
 
 	move(destination) {
 		// 1. update helper vectors
-		console.log(destination.x + ' ' + destination.y);
-		this.target = destination;
-		console.log(this.target.x + ' ' + this.target.y);
-		this.direction = this.target.sub(this.position);
-		console.log(this.target.x + ' ' + this.target.y);
+		this.target = destination.copy();
+		this.dest = destination.copy();
+		this.dest.sub(this.position);
+		// create direction from difference between pos and tar
+		let direction = p5.createVector(this.dest.x, this.dest.y);
 		this.direction.normalize();
 		this.direction.mult(0.5);
-		this.acceleration = this.direction;
+		this.acceleration = this.direction.copy();
 
 		// 2. start moving
 		this.moving = true;
@@ -80,9 +78,9 @@ export default class Piece {
 
 	resetMovement() {
 		this.moving = false;
-		this.target = p5.createVector(0, 0);
-		this.direction = p5.createVector(0, 0);
-		this.velocity = p5.createVector(0, 0);
-		this.acceleration = p5.createVector(0, 0);
+		this.target = this.emptyVector.copy();
+		this.direction = this.emptyVector.copy();;
+		this.velocity = this.emptyVector.copy();;
+		this.acceleration = this.emptyVector.copy();;
 	}
 }

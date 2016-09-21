@@ -95,6 +95,12 @@ const Helpers = {
 		} 
 
 		return canMove;
+	},
+
+	subtractAndReturnNewVector(v1, v2) {
+		v1.sub(v2);
+		let v3 = createVector(v)
+		return v3;
 	}
 }
 
