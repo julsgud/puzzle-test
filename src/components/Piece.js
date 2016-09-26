@@ -19,7 +19,7 @@ export default class Piece {
 		this.moving = false;
 
 		// sound
-		this.sound = new p5.loadSound('../assets/f' + this.realIndex.toString() + '.wav');
+		this.sound = new p5.loadSound('assets/f' + this.realIndex.toString() + '.wav');
 	}
 
 	display() {
