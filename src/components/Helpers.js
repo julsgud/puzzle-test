@@ -14,8 +14,16 @@ const Helpers = {
 		return that;
 	},
 
-	initLandscape: function(w, h, puzzleSize) {
+	initLandscape: function(w, h, spaces) {
 		let that = {};
+
+		that.frameX = (w - h)/2;
+		that.frameY = 0;
+		that.puzzleSize = h;
+		that.x = that.frameX;
+		that.y = 0;
+		that.pieceSize = that.puzzleSize/Math.sqrt(spaces);
+		that.pieceLocations = this.getPieceLocations(spaces, that.frameX, that.frameY, that.puzzleSize);
 
 		return that;
 	},
@@ -90,17 +98,31 @@ const Helpers = {
 	canPieceMove(pieces, clickedPiece, ghostPiece) {
 		let canMove = false;
 
-		if(clickedPiece != ghostPiece) {
+		if (clickedPiece != ghostPiece) {
 			canMove = pieces[clickedPiece].isAdjacentToGhostPiece(pieces[ghostPiece].getPosition());
 		} 
 
 		return canMove;
 	},
 
-	subtractAndReturnNewVector(v1, v2) {
-		v1.sub(v2);
-		let v3 = createVector(v)
-		return v3;
+	swapPiecesInArray(pieces, clickedPiece, ghostPiece) {
+		let temp = pieces[clickedPiece];
+
+		pieces[clickedPiece] = pieces[ghostPiece];
+
+		pieces[ghostPiece] = temp;
+
+		return pieces;
+	},
+
+	checkIfSolved(pieces) {
+		let bool = true;
+		for (var i = 0; i < pieces.length; i++) {
+			if (pieces[i].realIndex != i) {
+				bool = false;
+			}
+		}
+		return bool;
 	}
 }
 

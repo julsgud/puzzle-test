@@ -4,7 +4,8 @@
   "description": "Create p5 sketches using es6 and bundle files with webpack",
   "main": "index.js",
   "scripts": {
-    "start": "webpack && webpack-dev-server --watch --inline --content-base dist"
+    "start": "webpack && webpack-dev-server --watch --inline --content-base dist",
+    "prod": "webpack -p"
   },
   "repository": {
     "type": "git",

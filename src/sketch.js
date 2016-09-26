@@ -9,6 +9,10 @@ const sketch = (p5) => {
 	// make library globally available
 	window.p5 = p5;
 
+	// settings
+	let fps = 60;
+	let bpm = 133;
+
 	// state
 	let solved;
 
@@ -16,9 +20,33 @@ const sketch = (p5) => {
 	let puzzle;
 	let spaces = 9;
 
+	// font
+	let tabacGlam;
+
+	// colors
+	let backColor, frontColor;
+
+	// sound
+	let amp;
+
 	p5.setup = () => {
 		p5.createCanvas(p5.windowWidth, p5.windowHeight);
+		// p5.smooth(8);
+		p5.frameRate(fps);
 
+		// text
+		tabacGlam = p5.loadFont('./assets/tabac_glam.ttf');
+		p5.textFont(tabacGlam);
+
+		// colors
+		backColor = p5.color(247, 157, 95);
+		frontColor = p5.color(59, 65, 149);
+		console.log(p5.SoundFile);
+
+		// sound
+		// amp = new p5.Amplitude();
+
+		// layout
 		let layout = {};
 
 		if (p5.width <= p5.height) {
@@ -27,12 +55,12 @@ const sketch = (p5) => {
 			layout = Helpers.initLandscape(p5.width, p5.height, spaces);
 		}
 
-		// init objects
-		puzzle = new Puzzle(layout);
+		// init
+		puzzle = new Puzzle(layout, bpm, fps, backColor, frontColor);
 	}
 
 	p5.draw = () => {
-		p5.background(p5.color(252, 182, 157), 35);
+		p5.background(p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 255));
 		puzzle.display();
 	}
 
