@@ -43114,12 +43114,16 @@
 			this.size = layout.puzzleSize;
 			this.pieceLocations = layout.pieceLocations;
 			this.pieces = this.createPieces(this.pieceLocations, layout.pieceSize);
+			this.moving = false;
 		}
 
 		_createClass(Puzzle, [{
 			key: 'display',
 			value: function display() {
 				this.displayBoard();
+				this.pieces.forEach(function (p) {
+					return p.update();
+				});
 				this.pieces.forEach(function (p) {
 					return p.display();
 				});
@@ -43150,8 +43154,7 @@
 			}
 		}, {
 			key: 'movePiece',
-			value: function movePiece(x, y) {
-
+			value: function movePiece(x, y, moving) {
 				// 1. get index of clicked piece
 				var indexOfClickedPiece = _Helpers2.default.getIndexOfClickedPiece(this.pieces, x, y);
 				// console.log(indexOfClickedPiece);
@@ -43164,19 +43167,22 @@
 				var canMove = _Helpers2.default.canPieceMove(this.pieces, indexOfClickedPiece, indexOfGhostPiece);
 				// console.log(canMove);
 
-
 				if (canMove) {
-					// 4. swap locations
-					this.pieces[indexOfClickedPiece].move(this.pieces[indexOfGhostPiece].getPosition());
-					// this.pieces[indexOfGhostPiece].move(this.pieces[indexOfClickedPiece].getPosition());
-					// 5. swap position in array
+					this.pieces.forEach(function (p) {
+						return console.log(p);
+					});
+					// 4. move
+					this.pieces[indexOfClickedPiece].prepMovement(this.pieces[indexOfGhostPiece].getPosition());
+					this.pieces[indexOfGhostPiece].prepMovement(this.pieces[indexOfClickedPiece].getPosition());
+					// 5. swap in array
+					this.pieces = _Helpers2.default.swapPiecesInArray(this.pieces, indexOfClickedPiece, indexOfGhostPiece);
+					this.pieces.forEach(function (p) {
+						return console.log(p);
+					});
 				} else {
-						// try again
-					}
+					// try again
+				}
 			}
-		}, {
-			key: 'isPieceAdjacentToGhostPiece',
-			value: function isPieceAdjacentToGhostPiece() {}
 		}]);
 
 		return Puzzle;
@@ -43188,7 +43194,7 @@
 /* 5 */
 /***/ function(module, exports) {
 
-	'use strict';
+	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
 		value: true
@@ -43202,65 +43208,77 @@
 		function Piece(i, realIndex, size, location) {
 			_classCallCheck(this, Piece);
 
-			//
-			this.currentIndex = i;
+			this.initIndex = i;
 			this.realIndex = realIndex;
 			this.size = size;
 			this.color = p5.random(0, 200);
-			this.position = p5.createVector(location.x, location.y);
 
 			// movement
-			this.resetMovement();
-
-			// reset vector
-			this.initVector = p5.createVector(0, 0);
+			this.position = p5.createVector(location.x, location.y);
+			this.target = p5.createVector(0, 0);
+			this.direction = p5.createVector(0, 0);
+			this.velocity = p5.createVector(0, 0);
+			this.acceleration = p5.createVector(0, 0);
+			this.speedLimit = p5.width / 13;
+			this.moving = false;
 
 			// use index to load image and sound to piece
 		}
 
 		_createClass(Piece, [{
-			key: 'display',
-			value: function display(pieceLocations) {
-				if (this.moving) this.update();
+			key: "display",
+			value: function display() {
 				p5.fill(this.color);
 				p5.rect(this.position.x, this.position.y, this.size, this.size);
 			}
 		}, {
-			key: 'update',
+			key: "update",
 			value: function update() {
-				this.velocity.add(this.acceleration);
-				this.velocity.limit(2);
-				this.position.add(this.velocity);
+				if (this.moving) {
+					if (this.position.dist(this.target) > this.speedLimit) {
+						/* Accel away!*/
+						// 1. accel
+						this.velocity.add(this.acceleration);
 
-				if (this.position.x == this.target.x) {
-					console.log('bam');
-				} else {
-					console.log('doy');
-				}
-				console.log(this.position.x);
-				console.log(this.target.x);
-				if (this.position.equals(this.target)) {
-					this.resetMovement();
+						// 2. cap speed
+						this.velocity.limit(this.speedLimit);
+
+						// 3. move
+						this.position.add(this.velocity);
+					} else {
+						/* when distance is less than speed limit, use it to
+	     cap velocity and stop at dist===0 */
+						this.velocity.limit(this.position.dist(this.target));
+						this.position.add(this.velocity);
+					}
+
+					if (this.position.dist(this.target) === 0) {
+						this.acceleration.mult(0);
+						this.velocity.mult(0);
+						this.moving = false;
+					}
 				}
 			}
 		}, {
-			key: 'move',
-			value: function move(destination) {
+			key: "prepMovement",
+			value: function prepMovement(destination) {
 				// 1. update helper vectors
-				console.log(destination.x + ' ' + destination.y);
-				this.target = destination;
-				console.log(this.target.x + ' ' + this.target.y);
-				this.direction = this.target.sub(this.position);
-				console.log(this.target.x + ' ' + this.target.y);
-				this.direction.normalize();
-				this.direction.mult(0.5);
-				this.acceleration = this.direction;
+				this.target = destination.copy();
+				this.dest = destination.copy();
+				this.dest.sub(this.position);
+				// console.log(this.dest);
 
-				// 2. start moving
+				// create direction from difference between position and target
+				var direction = this.dest.copy();
+				direction.normalize();
+				this.acceleration = direction.copy();
+				//console.log(this.acceleration);
+
+				// 2. raise movement flag
 				this.moving = true;
 			}
 		}, {
-			key: 'wasClicked',
+			key: "wasClicked",
 			value: function wasClicked(x, y) {
 				if (x >= this.position.x && x <= this.position.x + this.size && y >= this.position.y && y <= this.position.y + this.size) {
 					return true;
@@ -43269,17 +43287,17 @@
 				}
 			}
 		}, {
-			key: 'getRealIndex',
+			key: "getRealIndex",
 			value: function getRealIndex() {
 				return this.realIndex;
 			}
 		}, {
-			key: 'getPosition',
+			key: "getPosition",
 			value: function getPosition() {
 				return this.position;
 			}
 		}, {
-			key: 'isAdjacentToGhostPiece',
+			key: "isAdjacentToGhostPiece",
 			value: function isAdjacentToGhostPiece(ghostPiece) {
 				if (p5.dist(this.position.x, this.position.y, ghostPiece.x, ghostPiece.y).toFixed(4) === this.size.toFixed(4)) {
 					return true;
@@ -43288,13 +43306,9 @@
 				}
 			}
 		}, {
-			key: 'resetMovement',
-			value: function resetMovement() {
-				this.moving = false;
-				this.target = p5.createVector(0, 0);
-				this.direction = p5.createVector(0, 0);
-				this.velocity = p5.createVector(0, 0);
-				this.acceleration = p5.createVector(0, 0);
+			key: "isMoving",
+			value: function isMoving() {
+				return this.moving;
 			}
 		}]);
 
@@ -43312,6 +43326,8 @@
 	Object.defineProperty(exports, "__esModule", {
 		value: true
 	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 	var _Piece2 = __webpack_require__(5);
 
@@ -43333,15 +43349,44 @@
 
 			var _this = _possibleConstructorReturn(this, (GhostPiece.__proto__ || Object.getPrototypeOf(GhostPiece)).call(this, i, realIndex, size, location));
 
-			_this.index = i;
+			_this.initIndex = i;
 			_this.realIndex = realIndex;
 			_this.size = size;
-			_this.color = '#3366cc';
+			_this.color = 255;
+
+			// movement
 			_this.position = p5.createVector(location.x, location.y);
+			_this.target = p5.createVector(0, 0);
+			_this.moving = false;
 
 			// use index to load image and sound to piece
 			return _this;
 		}
+
+		_createClass(GhostPiece, [{
+			key: 'display',
+			value: function display() {
+				p5.fill(this.color, 0);
+				p5.rect(this.position.x, this.position.y, this.size, this.size);
+			}
+		}, {
+			key: 'prepMovement',
+			value: function prepMovement(destination) {
+				// 1. update helper vectors
+				this.target = destination.copy();
+
+				// 2. raise movement flag
+				this.moving = true;
+			}
+		}, {
+			key: 'update',
+			value: function update() {
+				if (this.moving) {
+					this.position = this.target.copy();
+					this.moving = false;
+				}
+			}
+		}]);
 
 		return GhostPiece;
 	}(_Piece3.default);
@@ -43373,8 +43418,16 @@
 			return that;
 		},
 
-		initLandscape: function initLandscape(w, h, puzzleSize) {
+		initLandscape: function initLandscape(w, h, spaces) {
 			var that = {};
+
+			that.frameX = (w - h) / 2;
+			that.frameY = 0;
+			that.puzzleSize = h;
+			that.x = that.frameX;
+			that.y = 0;
+			that.pieceSize = that.puzzleSize / Math.sqrt(spaces);
+			that.pieceLocations = this.getPieceLocations(spaces, that.frameX, that.frameY, that.puzzleSize);
 
 			return that;
 		},
@@ -43459,6 +43512,24 @@
 			}
 
 			return canMove;
+		},
+		swapPiecesInArray: function swapPiecesInArray(pieces, clickedPiece, ghostPiece) {
+			var temp = pieces[clickedPiece];
+
+			pieces[clickedPiece] = pieces[ghostPiece];
+
+			pieces[ghostPiece] = temp;
+
+			return pieces;
+		},
+		checkIfSolved: function checkIfSolved(pieces) {
+			var bool = true;
+			for (var i = 0; i < pieces.length; i++) {
+				if (pieces[i].realIndex != i) {
+					bool = false;
+				}
+			}
+			return bool;
 		}
 	};
 
