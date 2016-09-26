@@ -72,6 +72,10 @@
 		// make library globally available
 		window.p5 = p5;
 
+		// settings
+		var fps = 60;
+		var bpm = 133;
+
 		// state
 		var solved = void 0;
 
@@ -79,9 +83,34 @@
 		var puzzle = void 0;
 		var spaces = 9;
 
+		// font
+		var tabacGlam = void 0;
+
+		// colors
+		var backColor = void 0,
+		    frontColor = void 0;
+
+		// sound
+		var amp = void 0;
+
 		p5.setup = function () {
 			p5.createCanvas(p5.windowWidth, p5.windowHeight);
+			// p5.smooth(8);
+			p5.frameRate(fps);
 
+			// text
+			tabacGlam = p5.loadFont('./assets/tabac_glam.ttf');
+			p5.textFont(tabacGlam);
+
+			// colors
+			backColor = p5.color(247, 157, 95);
+			frontColor = p5.color(59, 65, 149);
+			console.log(p5.SoundFile);
+
+			// sound
+			// amp = new p5.Amplitude();
+
+			// layout
 			var layout = {};
 
 			if (p5.width <= p5.height) {
@@ -90,12 +119,12 @@
 				layout = _Helpers2.default.initLandscape(p5.width, p5.height, spaces);
 			}
 
-			// init objects
-			puzzle = new _Puzzle2.default(layout);
+			// init
+			puzzle = new _Puzzle2.default(layout, bpm, fps, backColor, frontColor);
 		};
 
 		p5.draw = function () {
-			p5.background(p5.color(252, 182, 157), 35);
+			p5.background(p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 255));
 			puzzle.display();
 		};
 
@@ -43101,31 +43130,41 @@
 
 	var _Helpers2 = _interopRequireDefault(_Helpers);
 
+	var _Clock = __webpack_require__(8);
+
+	var _Clock2 = _interopRequireDefault(_Clock);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Puzzle = function () {
-		function Puzzle(layout) {
+		function Puzzle(layout, bpm, fps, backColor, frontColor) {
 			_classCallCheck(this, Puzzle);
 
 			this.x = layout.x;
 			this.y = layout.y;
 			this.size = layout.puzzleSize;
+			this.color = backColor;
+
 			this.pieceLocations = layout.pieceLocations;
-			this.pieces = this.createPieces(this.pieceLocations, layout.pieceSize);
+			this.pieces = this.createPieces(this.pieceLocations, layout.pieceSize, backColor, frontColor);
 			this.moving = false;
+
+			// sequencer
+			this.clock = new _Clock2.default(bpm, fps);
 		}
 
 		_createClass(Puzzle, [{
 			key: 'display',
-			value: function display() {
+			value: function display(amp) {
+				this.clock.run(this.pieces, _GhostPiece2.default);
 				this.displayBoard();
 				this.pieces.forEach(function (p) {
 					return p.update();
 				});
 				this.pieces.forEach(function (p) {
-					return p.display();
+					return p.display(amp);
 				});
 			}
 		}, {
@@ -43137,16 +43176,16 @@
 			}
 		}, {
 			key: 'createPieces',
-			value: function createPieces(pieceLocations, pieceSize) {
+			value: function createPieces(pieceLocations, pieceSize, backColor, frontColor) {
 				var pieces = new Array(pieceLocations.length);
 				var randomIndices = _Helpers2.default.generateRandomIndices(pieceLocations.length);
 				// console.log(randomIndices);
 
 				for (var i = 0; i < pieceLocations.length; i++) {
 					if (randomIndices[i] === 8) {
-						pieces[i] = new _GhostPiece2.default(i, pieces.length - 1, pieceSize, pieceLocations[i]);
+						pieces[i] = new _GhostPiece2.default(i, pieces.length - 1, pieceSize, pieceLocations[i], backColor, frontColor);
 					} else {
-						pieces[i] = new _Piece2.default(i, randomIndices[i], pieceSize, pieceLocations[i]);
+						pieces[i] = new _Piece2.default(i, randomIndices[i], pieceSize, pieceLocations[i], backColor, frontColor);
 					}
 				}
 
@@ -43168,20 +43207,16 @@
 				// console.log(canMove);
 
 				if (canMove) {
-					this.pieces.forEach(function (p) {
-						return console.log(p);
-					});
+					// this.pieces.forEach(p => console.log(p));
 					// 4. move
 					this.pieces[indexOfClickedPiece].prepMovement(this.pieces[indexOfGhostPiece].getPosition());
 					this.pieces[indexOfGhostPiece].prepMovement(this.pieces[indexOfClickedPiece].getPosition());
 					// 5. swap in array
 					this.pieces = _Helpers2.default.swapPiecesInArray(this.pieces, indexOfClickedPiece, indexOfGhostPiece);
-					this.pieces.forEach(function (p) {
-						return console.log(p);
-					});
+					// this.pieces.forEach(p => console.log(p));
 				} else {
-					// try again
-				}
+						// try again
+					}
 			}
 		}]);
 
@@ -43194,7 +43229,7 @@
 /* 5 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 		value: true
@@ -43205,13 +43240,16 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Piece = function () {
-		function Piece(i, realIndex, size, location) {
+		function Piece(i, realIndex, size, location, backColor, frontColor) {
 			_classCallCheck(this, Piece);
 
 			this.initIndex = i;
 			this.realIndex = realIndex;
 			this.size = size;
-			this.color = p5.random(0, 200);
+			this.color = frontColor;
+			this.colorPlaying = p5.color(p5.red(this.color), p5.green(frontColor), p5.blue(frontColor), 200);
+			this.textColor = p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 222);
+			this.playingColor = '#f00';
 
 			// movement
 			this.position = p5.createVector(location.x, location.y);
@@ -43222,17 +43260,29 @@
 			this.speedLimit = p5.width / 13;
 			this.moving = false;
 
-			// use index to load image and sound to piece
+			// sound
+			this.sound = new p5.loadSound('../assets/f' + this.realIndex.toString() + '.wav');
 		}
 
 		_createClass(Piece, [{
-			key: "display",
+			key: 'display',
 			value: function display() {
-				p5.fill(this.color);
+				if (this.sound.isPlaying()) {
+					// let level = amp.getLevel();
+					// let alpha = p5.map(level, 0, 1, 0, 255);
+					// p5.fill(p5.color(p5.red(this.color), p5.green(this.color), p5.blue(this.color), alpha)); 
+					p5.fill(this.colorPlaying);
+				} else {
+					p5.fill(this.color);
+				}
 				p5.rect(this.position.x, this.position.y, this.size, this.size);
+				p5.fill(this.textColor);
+				p5.textAlign(p5.CENTER, p5.CENTER);
+				p5.textSize(this.size / 3);
+				p5.text((this.realIndex + 1).toString(), this.position.x + this.size / 2, this.position.y + this.size / 2);
 			}
 		}, {
-			key: "update",
+			key: 'update',
 			value: function update() {
 				if (this.moving) {
 					if (this.position.dist(this.target) > this.speedLimit) {
@@ -43260,7 +43310,12 @@
 				}
 			}
 		}, {
-			key: "prepMovement",
+			key: 'play',
+			value: function play() {
+				this.sound.play();
+			}
+		}, {
+			key: 'prepMovement',
 			value: function prepMovement(destination) {
 				// 1. update helper vectors
 				this.target = destination.copy();
@@ -43278,7 +43333,7 @@
 				this.moving = true;
 			}
 		}, {
-			key: "wasClicked",
+			key: 'wasClicked',
 			value: function wasClicked(x, y) {
 				if (x >= this.position.x && x <= this.position.x + this.size && y >= this.position.y && y <= this.position.y + this.size) {
 					return true;
@@ -43287,17 +43342,17 @@
 				}
 			}
 		}, {
-			key: "getRealIndex",
+			key: 'getRealIndex',
 			value: function getRealIndex() {
 				return this.realIndex;
 			}
 		}, {
-			key: "getPosition",
+			key: 'getPosition',
 			value: function getPosition() {
 				return this.position;
 			}
 		}, {
-			key: "isAdjacentToGhostPiece",
+			key: 'isAdjacentToGhostPiece',
 			value: function isAdjacentToGhostPiece(ghostPiece) {
 				if (p5.dist(this.position.x, this.position.y, ghostPiece.x, ghostPiece.y).toFixed(4) === this.size.toFixed(4)) {
 					return true;
@@ -43306,7 +43361,7 @@
 				}
 			}
 		}, {
-			key: "isMoving",
+			key: 'isMoving',
 			value: function isMoving() {
 				return this.moving;
 			}
@@ -43344,15 +43399,15 @@
 	var GhostPiece = function (_Piece) {
 		_inherits(GhostPiece, _Piece);
 
-		function GhostPiece(i, realIndex, size, location) {
+		function GhostPiece(i, realIndex, size, location, backColor, frontColor) {
 			_classCallCheck(this, GhostPiece);
 
-			var _this = _possibleConstructorReturn(this, (GhostPiece.__proto__ || Object.getPrototypeOf(GhostPiece)).call(this, i, realIndex, size, location));
+			var _this = _possibleConstructorReturn(this, (GhostPiece.__proto__ || Object.getPrototypeOf(GhostPiece)).call(this, i, realIndex, size, location, backColor, frontColor));
 
 			_this.initIndex = i;
 			_this.realIndex = realIndex;
 			_this.size = size;
-			_this.color = 255;
+			_this.color = p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 128);
 
 			// movement
 			_this.position = p5.createVector(location.x, location.y);
@@ -43534,6 +43589,76 @@
 	};
 
 	exports.default = Helpers;
+
+/***/ },
+/* 8 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Clock = function () {
+		function Clock(bpm, fps) {
+			_classCallCheck(this, Clock);
+
+			this.bpm = bpm;
+			this.quarterNote = 60000 / this.bpm;
+			this.measure = Math.floor(this.quarterNote * 4);
+			this.currentPiece = 0;
+			this.lastTime = 0;
+		}
+
+		_createClass(Clock, [{
+			key: "run",
+			value: function run(pieces, GhostPiece) {
+
+				/* on run, play next piece if a full measure
+	   has elapsed since last event*/
+				if (p5.millis() - this.lastTime >= this.measure) {
+
+					/* if ghostpiece is next, skip*/
+					if (pieces[this.currentPiece] instanceof GhostPiece) {
+						this.currentPiece++;
+						// wrap piece index when ghost piece is in last spot
+						if (this.currentPiece > pieces.length - 1) this.currentPiece %= pieces.length;
+					} else {}
+					pieces[this.currentPiece].play();
+					this.currentPiece++;
+					this.currentPiece %= pieces.length;
+					this.lastTime = p5.millis();
+				}
+
+				// if (this.ms < this.margin && ) {
+				// 	// console.log('bang' + ' ' + this.currentPiece + ' ' + this.ms);
+				// 	if (pieces[this.currentPiece] instanceof GhostPiece) {
+				// 		this.currentPiece++;
+				// 		pieces[this.currentPiece].play();
+				// 		this.currentPiece++;
+				// 	} else {
+				// 		pieces[this.currentPiece].play(); 
+				// 		this.currentPiece++;
+				// 	}
+				// 	this.currentPiece %= pieces.length;
+				// } else if (this.ms < this.margin*1.3) {
+				// 	console.log(this.ms);
+				// }
+			}
+		}, {
+			key: "stop",
+			value: function stop() {}
+		}]);
+
+		return Clock;
+	}();
+
+	exports.default = Clock;
 
 /***/ }
 /******/ ]);
