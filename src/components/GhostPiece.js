@@ -14,6 +14,7 @@ export default class GhostPiece extends Piece {
 		this.moving = false;
 
 		// use index to load image and sound to piece
+		this.sound = null;
 	}
 
 	display() {

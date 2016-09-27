@@ -94,7 +94,7 @@
 
 		p5.preload = function () {
 			for (var i = 0; i < sounds.length; i++) {
-				sounds[i] = p5.loadSound('assets/f' + i.toString() + '.wav');
+				sounds[i] = p5.loadSound('assets/f' + i.toString() + '.mp3');
 			}
 
 			// for (let i = 0; i < sounds.length; i++) {
@@ -43189,7 +43189,7 @@
 
 				for (var i = 0; i < pieceLocations.length; i++) {
 					if (randomIndices[i] === 8) {
-						pieces[i] = new _GhostPiece2.default(i, pieces.length - 1, pieceSize, pieceLocations[i], backColor, frontColor);
+						pieces[i] = new _GhostPiece2.default(i, pieces.length - 1, pieceSize, pieceLocations[i], backColor, frontColor, sounds);
 					} else {
 						pieces[i] = new _Piece2.default(i, randomIndices[i], pieceSize, pieceLocations[i], backColor, frontColor, sounds);
 					}
@@ -43421,6 +43421,7 @@
 			_this.moving = false;
 
 			// use index to load image and sound to piece
+			_this.sound = null;
 			return _this;
 		}
 
