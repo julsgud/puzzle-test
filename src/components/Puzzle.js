@@ -5,14 +5,14 @@ import Clock from './Clock';
 
 export default class Puzzle {
 
-	constructor(layout, bpm, fps, backColor, frontColor) {
+	constructor(layout, bpm, fps, backColor, frontColor, sounds) {
 		this.x = layout.x;
 		this.y = layout.y;
 		this.size = layout.puzzleSize;
 		this.color = backColor;
 
 		this.pieceLocations = layout.pieceLocations;
-		this.pieces = this.createPieces(this.pieceLocations, layout.pieceSize, backColor, frontColor);
+		this.pieces = this.createPieces(this.pieceLocations, layout.pieceSize, backColor, frontColor, sounds);
 		this.moving = false;
 
 		// sequencer
@@ -32,7 +32,7 @@ export default class Puzzle {
 		p5.rect(this.x, this.y, this.size, this.size);
 	}
 	
-	createPieces(pieceLocations, pieceSize, backColor, frontColor) {
+	createPieces(pieceLocations, pieceSize, backColor, frontColor, sounds) {
 		let pieces = new Array(pieceLocations.length);
 		let randomIndices = Helpers.generateRandomIndices(pieceLocations.length);
 		// console.log(randomIndices);
@@ -41,7 +41,7 @@ export default class Puzzle {
 			if (randomIndices[i] === 8) {
 				pieces[i] = new GhostPiece(i, pieces.length-1, pieceSize, pieceLocations[i], backColor, frontColor);
 			} else {
-				pieces[i] = new Piece(i, randomIndices[i], pieceSize, pieceLocations[i], backColor, frontColor);
+				pieces[i] = new Piece(i, randomIndices[i], pieceSize, pieceLocations[i], backColor, frontColor, sounds);
 			}
 		}
 

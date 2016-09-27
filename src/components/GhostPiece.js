@@ -1,8 +1,8 @@
 import Piece from './Piece';
 
 export default class GhostPiece extends Piece {
-	constructor(i, realIndex, size, location, backColor, frontColor) {
-		super(i, realIndex, size, location, backColor, frontColor);
+	constructor(i, realIndex, size, location, backColor, frontColor, sounds) {
+		super(i, realIndex, size, location, backColor, frontColor, sounds);
 		this.initIndex = i;
 		this.realIndex = realIndex;
 		this.size = size;

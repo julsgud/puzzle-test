@@ -123,6 +123,10 @@ const Helpers = {
 			}
 		}
 		return bool;
+	},
+
+	onLoadSound(load, index) {
+		
 	}
 }
 

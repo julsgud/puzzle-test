@@ -1,5 +1,5 @@
 export default class Piece {
-	constructor(i, realIndex, size, location, backColor, frontColor) {
+	constructor(i, realIndex, size, location, backColor, frontColor, sounds) {
 		
 		this.initIndex = i;
 		this.realIndex = realIndex;
@@ -19,7 +19,7 @@ export default class Piece {
 		this.moving = false;
 
 		// sound
-		this.sound = new p5.loadSound('assets/f' + this.realIndex.toString() + '.wav');
+		this.sound = sounds[realIndex];
 	}
 
 	display() {

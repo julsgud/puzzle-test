@@ -13,6 +13,11 @@ const sketch = (p5) => {
 	let fps = 60;
 	let bpm = 133;
 
+	// external assets
+	let sounds = new Array(8);
+	let images = new Array(8);
+	let tabacGlam; 
+
 	// state
 	let solved;
 
@@ -20,14 +25,20 @@ const sketch = (p5) => {
 	let puzzle;
 	let spaces = 9;
 
-	// font
-	let tabacGlam;
-
 	// colors
 	let backColor, frontColor;
 
-	// sound
-	let amp;
+	p5.preload = () => {
+		for (let i = 0; i < sounds.length; i++) {
+			sounds[i] = p5.loadSound('assets/f' + i.toString() + '.wav');
+		}
+
+		// for (let i = 0; i < sounds.length; i++) {
+		// 	images[i] = p5.loadImage('assets/i' + i.toString() + '.png');
+		// }
+
+		tabacGlam = p5.loadFont('./assets/tabac_glam.ttf');
+	}
 
 	p5.setup = () => {
 		p5.createCanvas(p5.windowWidth, p5.windowHeight);
@@ -35,16 +46,11 @@ const sketch = (p5) => {
 		p5.frameRate(fps);
 
 		// text
-		tabacGlam = p5.loadFont('./assets/tabac_glam.ttf');
 		p5.textFont(tabacGlam);
 
 		// colors
 		backColor = p5.color(247, 157, 95);
 		frontColor = p5.color(59, 65, 149);
-		console.log(p5.SoundFile);
-
-		// sound
-		// amp = new p5.Amplitude();
 
 		// layout
 		let layout = {};
@@ -56,7 +62,7 @@ const sketch = (p5) => {
 		}
 
 		// init
-		puzzle = new Puzzle(layout, bpm, fps, backColor, frontColor);
+		puzzle = new Puzzle(layout, bpm, fps, backColor, frontColor, sounds);
 	}
 
 	p5.draw = () => {
@@ -66,7 +72,7 @@ const sketch = (p5) => {
 
 	p5.mouseClicked = () => {
 		// todo: only fire when in-bounds of board
-		puzzle.movePiece(p5.mouseX, p5.mouseY);
+		puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 	}	
 }
 
