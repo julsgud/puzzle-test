@@ -39,7 +39,7 @@ export default class Puzzle {
 
 		for (var i = 0; i < pieceLocations.length; i++) {
 			if (randomIndices[i] === 8) {
-				pieces[i] = new GhostPiece(i, pieces.length-1, pieceSize, pieceLocations[i], backColor, frontColor);
+				pieces[i] = new GhostPiece(i, pieces.length-1, pieceSize, pieceLocations[i], backColor, frontColor, sounds);
 			} else {
 				pieces[i] = new Piece(i, randomIndices[i], pieceSize, pieceLocations[i], backColor, frontColor, sounds);
 			}

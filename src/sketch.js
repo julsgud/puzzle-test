@@ -30,7 +30,7 @@ const sketch = (p5) => {
 
 	p5.preload = () => {
 		for (let i = 0; i < sounds.length; i++) {
-			sounds[i] = p5.loadSound('assets/f' + i.toString() + '.wav');
+			sounds[i] = p5.loadSound('assets/f' + i.toString() + '.mp3');
 		}
 
 		// for (let i = 0; i < sounds.length; i++) {
