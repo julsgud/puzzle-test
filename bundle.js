@@ -76,6 +76,11 @@
 		var fps = 60;
 		var bpm = 133;
 
+		// external assets
+		var sounds = new Array(8);
+		var images = new Array(8);
+		var tabacGlam = void 0;
+
 		// state
 		var solved = void 0;
 
@@ -83,15 +88,21 @@
 		var puzzle = void 0;
 		var spaces = 9;
 
-		// font
-		var tabacGlam = void 0;
-
 		// colors
 		var backColor = void 0,
 		    frontColor = void 0;
 
-		// sound
-		var amp = void 0;
+		p5.preload = function () {
+			for (var i = 0; i < sounds.length; i++) {
+				sounds[i] = p5.loadSound('assets/f' + i.toString() + '.wav');
+			}
+
+			// for (let i = 0; i < sounds.length; i++) {
+			// 	images[i] = p5.loadImage('assets/i' + i.toString() + '.png');
+			// }
+
+			tabacGlam = p5.loadFont('./assets/tabac_glam.ttf');
+		};
 
 		p5.setup = function () {
 			p5.createCanvas(p5.windowWidth, p5.windowHeight);
@@ -99,16 +110,11 @@
 			p5.frameRate(fps);
 
 			// text
-			tabacGlam = p5.loadFont('./assets/tabac_glam.ttf');
 			p5.textFont(tabacGlam);
 
 			// colors
 			backColor = p5.color(247, 157, 95);
 			frontColor = p5.color(59, 65, 149);
-			console.log(p5.SoundFile);
-
-			// sound
-			// amp = new p5.Amplitude();
 
 			// layout
 			var layout = {};
@@ -120,7 +126,7 @@
 			}
 
 			// init
-			puzzle = new _Puzzle2.default(layout, bpm, fps, backColor, frontColor);
+			puzzle = new _Puzzle2.default(layout, bpm, fps, backColor, frontColor, sounds);
 		};
 
 		p5.draw = function () {
@@ -130,7 +136,7 @@
 
 		p5.mouseClicked = function () {
 			// todo: only fire when in-bounds of board
-			puzzle.movePiece(p5.mouseX, p5.mouseY);
+			puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 		};
 	};
 
@@ -43139,7 +43145,7 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Puzzle = function () {
-		function Puzzle(layout, bpm, fps, backColor, frontColor) {
+		function Puzzle(layout, bpm, fps, backColor, frontColor, sounds) {
 			_classCallCheck(this, Puzzle);
 
 			this.x = layout.x;
@@ -43148,7 +43154,7 @@
 			this.color = backColor;
 
 			this.pieceLocations = layout.pieceLocations;
-			this.pieces = this.createPieces(this.pieceLocations, layout.pieceSize, backColor, frontColor);
+			this.pieces = this.createPieces(this.pieceLocations, layout.pieceSize, backColor, frontColor, sounds);
 			this.moving = false;
 
 			// sequencer
@@ -43176,7 +43182,7 @@
 			}
 		}, {
 			key: 'createPieces',
-			value: function createPieces(pieceLocations, pieceSize, backColor, frontColor) {
+			value: function createPieces(pieceLocations, pieceSize, backColor, frontColor, sounds) {
 				var pieces = new Array(pieceLocations.length);
 				var randomIndices = _Helpers2.default.generateRandomIndices(pieceLocations.length);
 				// console.log(randomIndices);
@@ -43185,7 +43191,7 @@
 					if (randomIndices[i] === 8) {
 						pieces[i] = new _GhostPiece2.default(i, pieces.length - 1, pieceSize, pieceLocations[i], backColor, frontColor);
 					} else {
-						pieces[i] = new _Piece2.default(i, randomIndices[i], pieceSize, pieceLocations[i], backColor, frontColor);
+						pieces[i] = new _Piece2.default(i, randomIndices[i], pieceSize, pieceLocations[i], backColor, frontColor, sounds);
 					}
 				}
 
@@ -43240,7 +43246,7 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Piece = function () {
-		function Piece(i, realIndex, size, location, backColor, frontColor) {
+		function Piece(i, realIndex, size, location, backColor, frontColor, sounds) {
 			_classCallCheck(this, Piece);
 
 			this.initIndex = i;
@@ -43261,7 +43267,7 @@
 			this.moving = false;
 
 			// sound
-			this.sound = new p5.loadSound('assets/f' + this.realIndex.toString() + '.wav');
+			this.sound = sounds[realIndex];
 		}
 
 		_createClass(Piece, [{
@@ -43399,10 +43405,10 @@
 	var GhostPiece = function (_Piece) {
 		_inherits(GhostPiece, _Piece);
 
-		function GhostPiece(i, realIndex, size, location, backColor, frontColor) {
+		function GhostPiece(i, realIndex, size, location, backColor, frontColor, sounds) {
 			_classCallCheck(this, GhostPiece);
 
-			var _this = _possibleConstructorReturn(this, (GhostPiece.__proto__ || Object.getPrototypeOf(GhostPiece)).call(this, i, realIndex, size, location, backColor, frontColor));
+			var _this = _possibleConstructorReturn(this, (GhostPiece.__proto__ || Object.getPrototypeOf(GhostPiece)).call(this, i, realIndex, size, location, backColor, frontColor, sounds));
 
 			_this.initIndex = i;
 			_this.realIndex = realIndex;
@@ -43585,7 +43591,8 @@
 				}
 			}
 			return bool;
-		}
+		},
+		onLoadSound: function onLoadSound(load, index) {}
 	};
 
 	exports.default = Helpers;
