@@ -134,9 +134,16 @@
 			puzzle.display();
 		};
 
-		p5.mouseClicked = function () {
+		p5.mousePressed = function () {
 			// todo: only fire when in-bounds of board
 			puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+			console.log('mouse pressed', p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+
+			return false;
+		};
+
+		p5.touchStarted = function () {
+			console.log('touch started', p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 		};
 	};
 
