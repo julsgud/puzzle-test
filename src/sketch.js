@@ -70,9 +70,16 @@ const sketch = (p5) => {
 		puzzle.display();
 	}
 
-	p5.mouseClicked = () => {
+	p5.mousePressed = () => {
 		// todo: only fire when in-bounds of board
 		puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+		console.log('mouse pressed', p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+
+		return false;
+	}
+
+	p5.touchStarted = () => {
+		console.log('touch started', p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 	}	
 }
 
