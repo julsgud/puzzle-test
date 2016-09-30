@@ -70,16 +70,18 @@ const sketch = (p5) => {
 		puzzle.display();
 	}
 
-	p5.mousePressed = () => {
-		// todo: only fire when in-bounds of board
-		puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
-		console.log('mouse pressed', p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+	// p5.mousePressed = () => {
+	// 	// todo: only fire when in-bounds of board
+	// 	console.log('mouse pressed', p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 
-		return false;
-	}
+	// 	return false;
+	// }
 
 	p5.touchStarted = () => {
+		puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 		console.log('touch started', p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+
+		return false;
 	}	
 }
 
