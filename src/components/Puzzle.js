@@ -35,7 +35,15 @@ export default class Puzzle {
 	createPieces(pieceLocations, pieceSize, backColor, frontColor, sounds) {
 		let pieces = new Array(pieceLocations.length);
 		let randomIndices = Helpers.generateRandomIndices(pieceLocations.length);
-		// console.log(randomIndices);
+		let polarity = Helpers.countInversions(randomIndices);
+
+		// make sure puzzle is solvable, see Helpers.js for more info
+		while (!Helpers.isEven(polarity)) {
+			randomIndices = Helpers.generateRandomIndices(pieceLocations.length);
+			polarity = Helpers.countInversions(randomIndices);
+			// console.log(polarity);
+			// console.log(Helpers.isEven(polarity));
+		}
 
 		for (var i = 0; i < pieceLocations.length; i++) {
 			if (randomIndices[i] === 8) {
@@ -69,9 +77,6 @@ export default class Puzzle {
 			// 5. swap in array
 			this.pieces = Helpers.swapPiecesInArray(this.pieces, indexOfClickedPiece, indexOfGhostPiece);
 			// this.pieces.forEach(p => console.log(p));
-
-		} else {
-			// try again
-		}
+		} 
 	}
 }

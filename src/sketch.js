@@ -4,6 +4,8 @@ import 'p5/lib/addons/p5.dom';
 import Puzzle from './components/Puzzle';
 import Piece from './components/Piece';
 import Helpers from './components/Helpers';
+import Shapes from './components/Shapes';
+import Button from './components/Button';
 
 const sketch = (p5) => {
 	// make library globally available
@@ -13,15 +15,19 @@ const sketch = (p5) => {
 	let fps = 60;
 	let bpm = 133;
 
-	// external assets
+	// assets
 	let sounds = new Array(8);
 	let images = new Array(8);
 	let tabacGlam; 
 
 	// state
-	let solved;
+	let started = false;
+	let solved = false;
 
 	// components
+	let layout;
+	let shapes;
+	let button;
 	let puzzle;
 	let spaces = 9;
 
@@ -42,7 +48,7 @@ const sketch = (p5) => {
 
 	p5.setup = () => {
 		p5.createCanvas(p5.windowWidth, p5.windowHeight);
-		// p5.smooth(8);
+		p5.smooth(8);
 		p5.frameRate(fps);
 
 		// text
@@ -53,33 +59,44 @@ const sketch = (p5) => {
 		frontColor = p5.color(59, 65, 149);
 
 		// layout
-		let layout = {};
-
 		if (p5.width <= p5.height) {
 			layout = Helpers.initPortrait(p5.width, p5.height, spaces);
 		} else {
 			layout = Helpers.initLandscape(p5.width, p5.height, spaces);
 		}
 
-		// init
+		// init shapes
+		shapes = new Shapes(layout.orientation, 8, 6 , fps, frontColor);
+
+		// init button
+		button = new Button(layout.orientation, p5.width/2, p5.height/2, 2, fps, backColor, frontColor);
+
+		// init puzzle
 		puzzle = new Puzzle(layout, bpm, fps, backColor, frontColor, sounds);
 	}
 
 	p5.draw = () => {
 		p5.background(p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 255));
-		puzzle.display();
+
+		if (!started) {
+			// console.log('no start yet');
+			shapes.display();
+			shapes.update();
+			if (shapes.getSize()) {
+				button.display();
+				button.update();
+			}
+		} else {
+			puzzle.display();
+		}
 	}
 
-	// p5.mousePressed = () => {
-	// 	// todo: only fire when in-bounds of board
-	// 	console.log('mouse pressed', p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
-
-	// 	return false;
-	// }
-
 	p5.touchStarted = () => {
-		puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
-		console.log('touch started', p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+		let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, button.x, button.y);
+		// todo: only fire when in-bounds of board
+		if (started && distance == 0) puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+		// console.log('touch started', p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+		if (!started && distance < button.radius()) button.bang();
 
 		return false;
 	}	

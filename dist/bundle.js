@@ -66,6 +66,10 @@
 
 	var _Helpers2 = _interopRequireDefault(_Helpers);
 
+	var _Shapes = __webpack_require__(9);
+
+	var _Shapes2 = _interopRequireDefault(_Shapes);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var sketch = function sketch(p5) {
@@ -76,15 +80,17 @@
 		var fps = 60;
 		var bpm = 133;
 
-		// external assets
+		// assets
 		var sounds = new Array(8);
 		var images = new Array(8);
 		var tabacGlam = void 0;
 
 		// state
 		var solved = void 0;
+		var started = void 0;
 
 		// components
+		var layout = void 0;
 		var puzzle = void 0;
 		var spaces = 9;
 
@@ -117,8 +123,6 @@
 			frontColor = p5.color(59, 65, 149);
 
 			// layout
-			var layout = {};
-
 			if (p5.width <= p5.height) {
 				layout = _Helpers2.default.initPortrait(p5.width, p5.height, spaces);
 			} else {
@@ -134,16 +138,10 @@
 			puzzle.display();
 		};
 
-		// p5.mousePressed = () => {
-		// 	// todo: only fire when in-bounds of board
-		// 	console.log('mouse pressed', p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
-
-		// 	return false;
-		// }
-
 		p5.touchStarted = function () {
+			// todo: only fire when in-bounds of board
 			puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
-			console.log('touch started', p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+			// console.log('touch started', p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 
 			return false;
 		};
@@ -43194,7 +43192,15 @@
 			value: function createPieces(pieceLocations, pieceSize, backColor, frontColor, sounds) {
 				var pieces = new Array(pieceLocations.length);
 				var randomIndices = _Helpers2.default.generateRandomIndices(pieceLocations.length);
-				// console.log(randomIndices);
+				var polarity = _Helpers2.default.countInversions(randomIndices);
+
+				// make sure puzzle is solvable, see Helpers.js for more info
+				while (!_Helpers2.default.isEven(polarity)) {
+					randomIndices = _Helpers2.default.generateRandomIndices(pieceLocations.length);
+					polarity = _Helpers2.default.countInversions(randomIndices);
+					// console.log(polarity);
+					// console.log(Helpers.isEven(polarity));
+				}
 
 				for (var i = 0; i < pieceLocations.length; i++) {
 					if (randomIndices[i] === 8) {
@@ -43229,9 +43235,7 @@
 					// 5. swap in array
 					this.pieces = _Helpers2.default.swapPiecesInArray(this.pieces, indexOfClickedPiece, indexOfGhostPiece);
 					// this.pieces.forEach(p => console.log(p));
-				} else {
-						// try again
-					}
+				}
 			}
 		}]);
 
@@ -43468,7 +43472,7 @@
 /* 7 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 		value: true
@@ -43478,6 +43482,7 @@
 			var that = {};
 
 			// layout variables
+			that.orientation = 'portrait';
 			that.frameX = 0;
 			that.frameY = (h - w) / 2;
 			that.puzzleSize = w;
@@ -43492,6 +43497,7 @@
 		initLandscape: function initLandscape(w, h, spaces) {
 			var that = {};
 
+			that.orientation = 'landscape';
 			that.frameX = (w - h) / 2;
 			that.frameY = 0;
 			that.puzzleSize = h;
@@ -43546,6 +43552,7 @@
 				nums[j] = temp;
 			}
 
+			// console.log(nums);
 			return nums;
 		},
 
@@ -43602,7 +43609,34 @@
 			}
 			return bool;
 		},
-		onLoadSound: function onLoadSound(load, index) {}
+		countInversions: function countInversions(randomIndices) {
+			/* a 3x3 slding puzzle can only
+	  be solved when its total inversions is even
+	  more info here: http://bit.ly/2dOueVY*/
+			var totalInversions = 0;
+
+			for (var i = 0; i < randomIndices.length; i++) {
+				var inversions = 0;
+				var current = randomIndices[i];
+
+				if (current < randomIndices.length - 1) {
+					// copy array from current index
+					var array = randomIndices.slice(i);
+					for (var j = 0; j < array.length; j++) {
+						if (array[j] < current) {
+							inversions++;
+						}
+					}
+				}
+
+				totalInversions += inversions;
+			}
+
+			return totalInversions;
+		},
+		isEven: function isEven(n) {
+			return n % 2 == 0;
+		}
 	};
 
 	exports.default = Helpers;
@@ -43676,6 +43710,147 @@
 	}();
 
 	exports.default = Clock;
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _Parallelogram = __webpack_require__(10);
+
+	var _Parallelogram2 = _interopRequireDefault(_Parallelogram);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Shapes = function () {
+		function Shapes(orientation, shapeCount, duration, fps, color) {
+			_classCallCheck(this, Shapes);
+
+			this.orientation = orientation;
+			this.shapeCount = shapeCount;
+			this.totalShapes = 1;
+			this.maxSizeX = p5.width * .61;
+			this.maxSizeY = p5.height * .61;
+			this.shapes[0] = new _Parallelogram2.default(this.maxSizeX, this.maxSizeY, duration, fps, color);
+		}
+
+		_createClass(Shapes, [{
+			key: 'display',
+			value: function display() {
+				for (var i = 0; i < this.shapes.length; i++) {
+					this.shapes[i].display();
+					this.shapes[i].update();
+				}
+			}
+		}, {
+			key: 'update',
+			value: function update() {
+				if (this.totalShapes < this.shapeCount && this.shapes[totalShapes - 1].getSizeX() < this.maxSizeX / (this.shapeCount - 1)) {
+					this.totalShapes++;
+					this.shapes[totalShapes - 1] = new _Parallelogram2.default(this.maxSizeX, this.maxSizeY, duration, fps, color);
+				}
+			}
+		}]);
+
+		return Shapes;
+	}();
+
+	exports.default = Shapes;
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Parallelogram = function () {
+		function Parallelogram(maxSizeX, maxSizeY, duration, fps, color) {
+			_classCallCheck(this, Parallelogram);
+
+			// layout
+			this.x = new Array(4);
+			this.y = new Array(4);
+			this.maxSizeX = maxSizeX;
+			this.maxSizeY = maxSizeY;
+			this.c = color;
+			this.alpha = 0;
+
+			// animation
+			this.framesToMax = duration * fps;
+			this.changeFactorX = maxSizeX / this.framesToMax;
+			this.shrinkFactorY = maxSizeY / this.framesToMax;
+			this.fadeFactor = 255 / this.framesToMax;
+
+			this.initLayout(p5.width, p5.height, this.maxSizeX, this.maxSizeY);
+		}
+
+		_createClass(Parallelogram, [{
+			key: "display",
+			value: function display() {
+				p5.noStroke();
+				p5.fill(p5.red(this.c), p5.green(this.c), p5.blue(this.c), this.alpha);
+				p5.quad(this.x[0], this.y[0], this.x[1], this.y[1], this.x[2], this.y[2], this.x[3], this.y[3]);
+			}
+		}, {
+			key: "update",
+			value: function update() {
+				if (this.getSizeX() > 0) {
+					this.x[0] += this.shrinkFactorX / 5 * 3;
+					this.x[1] -= this.shrinkFactorX / 5 * 2;
+					this.x[2] -= this.shrinkFactorX / 5 * 3;
+					this.x[3] += this.shrinkFactorX / 5 * 2;
+
+					this.y[0] += this.shrinkFactorY / 2;
+					this.y[1] += this.shrinkFactorY / 2;
+					this.y[2] -= this.shrinkFactorY / 2;
+					this.y[3] -= this.shrinkFactorY / 2;
+
+					this.alpha += this.fadeFactor;
+				} else {
+					this.initLayout(p5.width, p5.height, this.maxSizeX, this.maxSizeY);
+				}
+			}
+		}, {
+			key: "initLayout",
+			value: function initLayout(width, height, maxSizeX, maxSizeY) {
+				this.x[0] = width / 2 - maxSizeX * .60;
+				this.x[1] = width / 2 + maxSizeX * .40;
+				this.x[2] = width / 2 + maxSizeX * .60;
+				this.x[3] = width / 2 - maxSizeX * .40;
+
+				this.y[0] = height / 2 - maxSizeY / 2;
+				this.y[1] = this.y[0];
+				this.y[2] = height / 2 + maxSizeY / 2;
+				this.y[3] = this.y[2];
+			}
+		}, {
+			key: "getSizeX",
+			value: function getSizeX() {
+				return this.x[1] - this.x[0];
+			}
+		}]);
+
+		return Parallelogram;
+	}();
+
+	exports.default = Parallelogram;
 
 /***/ }
 /******/ ]);

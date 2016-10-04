@@ -1,6 +1,5 @@
 export default class Piece {
 	constructor(i, realIndex, size, location, backColor, frontColor, sounds) {
-		
 		this.initIndex = i;
 		this.realIndex = realIndex;
 		this.size = size;

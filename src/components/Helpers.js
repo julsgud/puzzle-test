@@ -3,6 +3,7 @@ const Helpers = {
 		let that = {};
 
 		// layout variables
+		that.orientation = 'portrait';
 		that.frameX = 0;
 		that.frameY = (h - w)/2;
 		that.puzzleSize = w;
@@ -17,6 +18,7 @@ const Helpers = {
 	initLandscape: function(w, h, spaces) {
 		let that = {};
 
+		that.orientation = 'landscape';
 		that.frameX = (w - h)/2;
 		that.frameY = 0;
 		that.puzzleSize = h;
@@ -68,6 +70,7 @@ const Helpers = {
 			nums[j] = temp;
 		}
 
+		// console.log(nums);
 		return nums;
 	},
 
@@ -125,8 +128,34 @@ const Helpers = {
 		return bool;
 	},
 
-	onLoadSound(load, index) {
-		
+	countInversions(randomIndices) {
+		/* a 3x3 slding puzzle can only
+		be solved when its total inversions is even
+		more info here: http://bit.ly/2dOueVY*/
+		let totalInversions = 0;
+
+		for (let i = 0; i < randomIndices.length; i++) {
+			let inversions = 0;
+			let current = randomIndices[i];
+
+			if (current < randomIndices.length-1) {
+				// copy array from current index
+				let array = randomIndices.slice(i);
+				for (let j = 0; j < array.length; j++) {
+					if (array[j] < current) {
+						inversions++;
+					}
+				}
+			}
+
+			totalInversions += inversions;
+		}
+
+		return totalInversions;
+	},
+
+	isEven(n) {
+		return n % 2 == 0;
 	}
 }
 
