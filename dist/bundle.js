@@ -70,6 +70,10 @@
 
 	var _Shapes2 = _interopRequireDefault(_Shapes);
 
+	var _Button = __webpack_require__(11);
+
+	var _Button2 = _interopRequireDefault(_Button);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var sketch = function sketch(p5) {
@@ -86,11 +90,13 @@
 		var tabacGlam = void 0;
 
 		// state
-		var solved = void 0;
-		var started = void 0;
+		var started = false;
+		var solved = false;
 
 		// components
 		var layout = void 0;
+		var shapes = void 0;
+		var button = void 0;
 		var puzzle = void 0;
 		var spaces = 9;
 
@@ -112,7 +118,7 @@
 
 		p5.setup = function () {
 			p5.createCanvas(p5.windowWidth, p5.windowHeight);
-			// p5.smooth(8);
+			p5.smooth(8);
 			p5.frameRate(fps);
 
 			// text
@@ -129,19 +135,38 @@
 				layout = _Helpers2.default.initLandscape(p5.width, p5.height, spaces);
 			}
 
-			// init
+			// init shapes
+			shapes = new _Shapes2.default(layout.orientation, 8, 6, fps, frontColor);
+
+			// init button
+			button = new _Button2.default(layout.orientation, p5.width / 2, p5.height / 2, 2, fps, backColor, frontColor);
+
+			// init puzzle
 			puzzle = new _Puzzle2.default(layout, bpm, fps, backColor, frontColor, sounds);
 		};
 
 		p5.draw = function () {
 			p5.background(p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 255));
-			puzzle.display();
+
+			if (!started) {
+				// console.log('no start yet');
+				shapes.display();
+				shapes.update();
+				if (shapes.getSize()) {
+					button.display();
+					button.update();
+				}
+			} else {
+				puzzle.display();
+			}
 		};
 
 		p5.touchStarted = function () {
+			var distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, button.x, button.y);
 			// todo: only fire when in-bounds of board
-			puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+			if (started && distance == 0) puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 			// console.log('touch started', p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+			if (!started && distance < button.radius()) button.bang();
 
 			return false;
 		};
@@ -43737,15 +43762,27 @@
 
 			this.orientation = orientation;
 			this.shapeCount = shapeCount;
+			this.duration = duration;
+			this.color = color;
+			this.fps = fps;
 			this.totalShapes = 1;
-			this.maxSizeX = p5.width * .61;
-			this.maxSizeY = p5.height * .61;
+
+			if (this.orientation == 'portrait') {
+				this.maxSizeX = p5.width / 8 * 7;
+				this.maxSizeY = p5.width / 8 * 7;
+			} else {
+				this.maxSizeX = p5.height / 8 * 7.5;
+				this.maxSizeY = p5.height / 8 * 7.5;
+			}
+
+			this.shapes = [];
 			this.shapes[0] = new _Parallelogram2.default(this.maxSizeX, this.maxSizeY, duration, fps, color);
 		}
 
 		_createClass(Shapes, [{
 			key: 'display',
 			value: function display() {
+				// console.log(this.shapes.length);
 				for (var i = 0; i < this.shapes.length; i++) {
 					this.shapes[i].display();
 					this.shapes[i].update();
@@ -43754,10 +43791,15 @@
 		}, {
 			key: 'update',
 			value: function update() {
-				if (this.totalShapes < this.shapeCount && this.shapes[totalShapes - 1].getSizeX() < this.maxSizeX / (this.shapeCount - 1)) {
+				if (this.totalShapes < this.shapeCount && this.shapes[this.totalShapes - 1].getSizeX() < this.maxSizeX / this.shapeCount * (this.shapeCount - 1)) {
 					this.totalShapes++;
-					this.shapes[totalShapes - 1] = new _Parallelogram2.default(this.maxSizeX, this.maxSizeY, duration, fps, color);
+					this.shapes[this.totalShapes - 1] = new _Parallelogram2.default(this.maxSizeX, this.maxSizeY, this.duration, this.fps, this.color);
 				}
+			}
+		}, {
+			key: 'getSize',
+			value: function getSize() {
+				return this.shapes.length;
 			}
 		}]);
 
@@ -43794,7 +43836,7 @@
 
 			// animation
 			this.framesToMax = duration * fps;
-			this.changeFactorX = maxSizeX / this.framesToMax;
+			this.shrinkFactorX = maxSizeX / this.framesToMax;
 			this.shrinkFactorY = maxSizeY / this.framesToMax;
 			this.fadeFactor = 255 / this.framesToMax;
 
@@ -43839,6 +43881,8 @@
 				this.y[1] = this.y[0];
 				this.y[2] = height / 2 + maxSizeY / 2;
 				this.y[3] = this.y[2];
+
+				this.alpha = 0;
 			}
 		}, {
 			key: "getSizeX",
@@ -43851,6 +43895,115 @@
 	}();
 
 	exports.default = Parallelogram;
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Button = function () {
+		function Button(orientation, x, y, duration, fps, c1, c2) {
+			_classCallCheck(this, Button);
+
+			this.x = x;
+			this.y = y;
+			this.buttonSize = 0;
+			if (orientation == 'portrait') {
+				this.buttonSize = p5.width / 8;
+			} else {
+				this.buttonSize = p5.height / 8;
+			}
+			this.size = 0;
+			this.anchorSize = this.buttonSize;
+			this.size2 = this.buttonSize / 90;
+			this.duration = duration;
+			this.fps = fps;
+			this.c1 = c1;
+			this.c2 = c2;
+			this.alpha = 0;
+
+			// ani
+			this.framesToMax = duration * fps;
+			this.fadeFactor = 255 / this.framesToMax;
+			this.growthFactor = this.buttonSize / this.framesToMax;
+			this.angle = 0.0;
+
+			// layout
+		}
+
+		_createClass(Button, [{
+			key: 'display',
+			value: function display(started, solved, shapeCount, totalShapes) {
+				if (!started && !solved && shapeCount == totalShapes) this.fadeIn();
+				if (started) this.fadeOut();
+				this.grow();
+				p5.fill(p5.red(this.c1), p5.green(this.c1), p5.blue(this.c1), this.alpha);
+				// p5.ellipse(this.x, this.y, this.size, this.size);
+				p5.fill(255, 200);
+				p5.triangle(this.x - this.size / 5, this.y - this.size / 5, this.x + this.size / 4, this.y, this.x - this.size / 5, this.y + this.size / 5);
+			}
+		}, {
+			key: 'update',
+			value: function update() {
+				if (this.alpha > 155 && this.size >= this.anchorSize - this.anchorSize / 10) {
+					// console.log(angle);
+					this.size = this.size + this.size2 * Math.sin(this.angle);
+					this.angle += 0.07;
+					// console.log(this.size);
+					// console.log(this.size*Math.sin(this.angle));
+				}
+			}
+		}, {
+			key: 'fadeIn',
+			value: function fadeIn() {
+				if (this.alpha < 255) this.alpha += this.fadeFactor / 2;
+			}
+		}, {
+			key: 'fadeOut',
+			value: function fadeOut() {
+				if (this.alpha > 0) this.alpha += this.fadeFactor;
+			}
+		}, {
+			key: 'grow',
+			value: function grow() {
+				if (this.size < this.anchorSize) this.size += this.growthFactor;
+				// console.log(this.size + ' ' + this.buttonSize);
+			}
+		}, {
+			key: 'x',
+			value: function x() {
+				return this.x;
+			}
+		}, {
+			key: 'y',
+			value: function y() {
+				return this.y;
+			}
+		}, {
+			key: 'radius',
+			value: function radius() {
+				return this.anchorSize;
+			}
+		}, {
+			key: 'bang',
+			value: function bang() {
+				console.log('bang');
+			}
+		}]);
+
+		return Button;
+	}();
+
+	exports.default = Button;
 
 /***/ }
 /******/ ]);
