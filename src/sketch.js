@@ -98,7 +98,7 @@ const sketch = (p5) => {
 			if (!started && distance < button.radius()) started = button.bang(started);
 		} else {
 			let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, puzzle.getX(), puzzle.getY());
-			if (!solved && distance < puzzle.area()) puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+			if (!solved && distance < puzzle.getSize()) puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 		}
 
 		return false;

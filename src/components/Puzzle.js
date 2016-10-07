@@ -87,4 +87,8 @@ export default class Puzzle {
 	getY() {	
 		return this.y + this.size/2;
 	}
+
+	getSize() {
+		return this.size/2;
+	}
 }
