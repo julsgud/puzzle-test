@@ -21,12 +21,13 @@ const sketch = (p5) => {
 	let tabacGlam; 
 
 	// state
-	let started = false;
+	var started = false;
 	let solved = false;
 
 	// components
 	let layout;
 	let shapes;
+	let shapeCount = 8;
 	let button;
 	let puzzle;
 	let spaces = 9;
@@ -66,7 +67,7 @@ const sketch = (p5) => {
 		}
 
 		// init shapes
-		shapes = new Shapes(layout.orientation, 8, 6 , fps, frontColor);
+		shapes = new Shapes(layout.orientation, shapeCount, 6 , fps, frontColor);
 
 		// init button
 		button = new Button(layout.orientation, p5.width/2, p5.height/2, 2, fps, backColor, frontColor);
@@ -79,10 +80,9 @@ const sketch = (p5) => {
 		p5.background(p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 255));
 
 		if (!started) {
-			// console.log('no start yet');
 			shapes.display();
 			shapes.update();
-			if (shapes.getSize()) {
+			if (shapes.getSize() === shapeCount) {
 				button.display();
 				button.update();
 			}
@@ -92,11 +92,14 @@ const sketch = (p5) => {
 	}
 
 	p5.touchStarted = () => {
-		let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, button.x, button.y);
-		// todo: only fire when in-bounds of board
-		if (started && distance == 0) puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
-		// console.log('touch started', p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
-		if (!started && distance < button.radius()) button.bang();
+
+		if (!started) {
+			let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, button.x, button.y);
+			if (!started && distance < button.radius()) started = button.bang(started);
+		} else {
+			let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, puzzle.getX(), puzzle.getY());
+			if (!solved && distance < puzzle.area()) puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+		}
 
 		return false;
 	}	

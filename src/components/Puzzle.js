@@ -79,4 +79,12 @@ export default class Puzzle {
 			// this.pieces.forEach(p => console.log(p));
 		} 
 	}
+
+	getX() {
+		return this.x + this.size/2;
+	}
+
+	getY() {	
+		return this.y + this.size/2;
+	}
 }

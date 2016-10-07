@@ -48,7 +48,7 @@ export default class Button {
 	}
 
 	fadeIn() {
-		if(this.alpha < 255) this.alpha += this.fadeFactor/2;
+		if(this.alpha < 255) this.alpha += this.fadeFactor;
 	}
 
 	fadeOut() {
@@ -56,23 +56,15 @@ export default class Button {
 	}
 
 	grow() {
-		if (this.size < this.anchorSize) this.size += this.growthFactor;
+		if (this.size < this.anchorSize) this.size += this.growthFactor*2;
 		// console.log(this.size + ' ' + this.buttonSize);
-	}
-
-	x() {
-		return this.x;
-	}
-
-	y() {
-		return this.y;
 	}
 
 	radius() {
 		return this.anchorSize;
 	}
 
-	bang() {
-		console.log('bang');
+	bang(started) {
+		if (!started) return true;
 	}
 }

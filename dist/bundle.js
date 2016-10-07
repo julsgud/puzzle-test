@@ -162,11 +162,14 @@
 		};
 
 		p5.touchStarted = function () {
-			var distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, button.x, button.y);
-			// todo: only fire when in-bounds of board
-			if (started && distance == 0) puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
-			// console.log('touch started', p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
-			if (!started && distance < button.radius()) button.bang();
+
+			if (!started) {
+				var distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, button.x, button.y);
+				if (!started && distance < button.radius()) button.bang();
+			} else {
+				var _distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, puzzle.x, puzzle.y);
+				if (!solved && _distance < puzzle.area()) puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+			}
 
 			return false;
 		};
@@ -43262,6 +43265,16 @@
 					// this.pieces.forEach(p => console.log(p));
 				}
 			}
+		}, {
+			key: 'x',
+			value: function x() {
+				return this.x + this.size / 2;
+			}
+		}, {
+			key: 'y',
+			value: function y() {
+				return this.y + this.size / 2;
+			}
 		}]);
 
 		return Puzzle;
@@ -43981,6 +43994,7 @@
 		}, {
 			key: 'x',
 			value: function x() {
+				console.log('hey');
 				return this.x;
 			}
 		}, {
