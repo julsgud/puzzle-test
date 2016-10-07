@@ -96,6 +96,7 @@
 		// components
 		var layout = void 0;
 		var shapes = void 0;
+		var shapeCount = 8;
 		var button = void 0;
 		var puzzle = void 0;
 		var spaces = 9;
@@ -136,7 +137,7 @@
 			}
 
 			// init shapes
-			shapes = new _Shapes2.default(layout.orientation, 8, 6, fps, frontColor);
+			shapes = new _Shapes2.default(layout.orientation, shapeCount, 6, fps, frontColor);
 
 			// init button
 			button = new _Button2.default(layout.orientation, p5.width / 2, p5.height / 2, 2, fps, backColor, frontColor);
@@ -149,10 +150,9 @@
 			p5.background(p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 255));
 
 			if (!started) {
-				// console.log('no start yet');
 				shapes.display();
 				shapes.update();
-				if (shapes.getSize()) {
+				if (shapes.getSize() === shapeCount) {
 					button.display();
 					button.update();
 				}
@@ -165,9 +165,9 @@
 
 			if (!started) {
 				var distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, button.x, button.y);
-				if (!started && distance < button.radius()) button.bang();
+				if (!started && distance < button.radius()) started = button.bang(started);
 			} else {
-				var _distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, puzzle.x, puzzle.y);
+				var _distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, puzzle.getX(), puzzle.getY());
 				if (!solved && _distance < puzzle.area()) puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 			}
 
@@ -43266,13 +43266,13 @@
 				}
 			}
 		}, {
-			key: 'x',
-			value: function x() {
+			key: 'getX',
+			value: function getX() {
 				return this.x + this.size / 2;
 			}
 		}, {
-			key: 'y',
-			value: function y() {
+			key: 'getY',
+			value: function getY() {
 				return this.y + this.size / 2;
 			}
 		}]);
@@ -43978,7 +43978,7 @@
 		}, {
 			key: 'fadeIn',
 			value: function fadeIn() {
-				if (this.alpha < 255) this.alpha += this.fadeFactor / 2;
+				if (this.alpha < 255) this.alpha += this.fadeFactor;
 			}
 		}, {
 			key: 'fadeOut',
@@ -43988,19 +43988,8 @@
 		}, {
 			key: 'grow',
 			value: function grow() {
-				if (this.size < this.anchorSize) this.size += this.growthFactor;
+				if (this.size < this.anchorSize) this.size += this.growthFactor * 2;
 				// console.log(this.size + ' ' + this.buttonSize);
-			}
-		}, {
-			key: 'x',
-			value: function x() {
-				console.log('hey');
-				return this.x;
-			}
-		}, {
-			key: 'y',
-			value: function y() {
-				return this.y;
 			}
 		}, {
 			key: 'radius',
@@ -44009,8 +43998,8 @@
 			}
 		}, {
 			key: 'bang',
-			value: function bang() {
-				console.log('bang');
+			value: function bang(started) {
+				if (!started) return true;
 			}
 		}]);
 
