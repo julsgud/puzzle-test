@@ -168,7 +168,7 @@
 				if (!started && distance < button.radius()) started = button.bang(started);
 			} else {
 				var _distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, puzzle.getX(), puzzle.getY());
-				if (!solved && _distance < puzzle.area()) puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+				if (!solved && _distance < puzzle.getSize()) puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 			}
 
 			return false;
@@ -43274,6 +43274,11 @@
 			key: 'getY',
 			value: function getY() {
 				return this.y + this.size / 2;
+			}
+		}, {
+			key: 'getSize',
+			value: function getSize() {
+				return this.size / 2;
 			}
 		}]);
 
