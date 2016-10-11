@@ -118,4 +118,12 @@ export default class Piece {
 	isMoving() {
 		return this.moving;
 	}
+
+	isInPlace(i) {
+		if (i === this.realIndex) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 }

@@ -19,11 +19,11 @@ export default class Puzzle {
 		this.clock = new Clock(bpm, fps);
 	}
 
-	display(amp) {
+	display() {
 		this.clock.run(this.pieces, GhostPiece);
 		this.displayBoard();
 		this.pieces.forEach(p => p.update());
-		this.pieces.forEach(p => p.display(amp));
+		this.pieces.forEach(p => p.display());
 	}
 
 	displayBoard() {
@@ -53,10 +53,22 @@ export default class Puzzle {
 			}
 		}
 
+		/*
+		Init puzzle without creating pieces
+		On start flag:
+		1. Create pieces in correct place
+		2. Use (alternate!?) movePiece method to move each to its shuffled spot
+		3. Start running clock 
+		4. Allow interaction
+	
+		*/
+
 		return pieces;
 	}
 
-	movePiece(x, y, moving) {
+	movePiece(x, y) {
+		let solved = false;
+
 		// 1. get index of clicked piece
 		let indexOfClickedPiece = Helpers.getIndexOfClickedPiece(this.pieces, x, y);
 		// console.log(indexOfClickedPiece);
@@ -69,6 +81,7 @@ export default class Puzzle {
 		let canMove = Helpers.canPieceMove(this.pieces, indexOfClickedPiece, indexOfGhostPiece);
 		// console.log(canMove);
 		
+
 		if (canMove) {
 			// this.pieces.forEach(p => console.log(p));
 			// 4. move
@@ -78,6 +91,16 @@ export default class Puzzle {
 			this.pieces = Helpers.swapPiecesInArray(this.pieces, indexOfClickedPiece, indexOfGhostPiece);
 			// this.pieces.forEach(p => console.log(p));
 		} 
+
+		//6. Check if puzzle is solved
+
+		solved = this.isSolved();
+
+		if (solved) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	getX() {
@@ -90,5 +113,25 @@ export default class Puzzle {
 
 	getSize() {
 		return this.size/2;
+	}
+
+	isSolved() {
+		let i = 0, inCorrectSpot = 0, bool = false;
+
+		while (i < this.pieces.length) {
+			bool = this.pieces[i].isInPlace(i);
+			if (bool) inCorrectSpot++;
+			i++;
+		}
+
+		if (inCorrectSpot === this.pieces.length) {
+			bool = true;
+		} else {
+			bool = false;
+		}
+
+		console.log('solved: ' + bool + " inSpot: " + inCorrectSpot);
+
+		return bool;
 	}
 }

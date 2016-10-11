@@ -80,23 +80,16 @@ const sketch = (p5) => {
 	p5.draw = () => {
 		p5.background(p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 255));
 
-		if (!started) {
+		if (!started || solved) {
 			shapes.display(started);
 			shapes.update();
-			if (shapes.getSize() === shapeCount) {
+			if (shapes.getSize() === shapeCount && !started) {
 				button.display(started, solved, shapeCount, shapes.getSize());
 				button.update();
 			}
-			// if (transition) transition = shapes.isRunning();
 		} else {
 			puzzle.display();
 		}
-		// puzzle.display();
-
-		// p5.noFill();
-		// p5.stroke(255);
-		// p5.strokeWeight(1);
-		// p5.rect(layout.x, layout.y, layout.puzzleSize, layout.puzzleSize);
 	}
 
 	p5.touchStarted = () => {
@@ -104,13 +97,14 @@ const sketch = (p5) => {
 		if (!started) {
 			let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, button.x, button.y);
 			if (!started && distance < button.radius()) {
-				// shapes.stop();
 				started = button.bang(started);	
-				transition = true;
+				// transition = true;
 			} 
 		} else {
 			let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, puzzle.getX(), puzzle.getY());
-			if (!solved && distance < puzzle.getSize()) puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+			if (!solved && distance < puzzle.getSize()) {
+				solved = puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+			}
 		}
 
 		// puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);

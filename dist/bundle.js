@@ -150,23 +150,16 @@
 		p5.draw = function () {
 			p5.background(p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 255));
 
-			if (!started) {
+			if (!started || solved) {
 				shapes.display(started);
 				shapes.update();
-				if (shapes.getSize() === shapeCount) {
+				if (shapes.getSize() === shapeCount && !started) {
 					button.display(started, solved, shapeCount, shapes.getSize());
 					button.update();
 				}
-				// if (transition) transition = shapes.isRunning();
 			} else {
 				puzzle.display();
 			}
-			// puzzle.display();
-
-			// p5.noFill();
-			// p5.stroke(255);
-			// p5.strokeWeight(1);
-			// p5.rect(layout.x, layout.y, layout.puzzleSize, layout.puzzleSize);
 		};
 
 		p5.touchStarted = function () {
@@ -174,13 +167,14 @@
 			if (!started) {
 				var distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, button.x, button.y);
 				if (!started && distance < button.radius()) {
-					// shapes.stop();
 					started = button.bang(started);
-					transition = true;
+					// transition = true;
 				}
 			} else {
 				var _distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, puzzle.getX(), puzzle.getY());
-				if (!solved && _distance < puzzle.getSize()) puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+				if (!solved && _distance < puzzle.getSize()) {
+					solved = puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+				}
 			}
 
 			// puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
@@ -43222,14 +43216,14 @@
 
 		_createClass(Puzzle, [{
 			key: 'display',
-			value: function display(amp) {
+			value: function display() {
 				this.clock.run(this.pieces, _GhostPiece2.default);
 				this.displayBoard();
 				this.pieces.forEach(function (p) {
 					return p.update();
 				});
 				this.pieces.forEach(function (p) {
-					return p.display(amp);
+					return p.display();
 				});
 			}
 		}, {
@@ -43262,11 +43256,22 @@
 					}
 				}
 
+				/*
+	   Init puzzle without creating pieces
+	   On start flag:
+	   1. Create pieces in correct place
+	   2. Use (alternate!?) movePiece method to move each to its shuffled spot
+	   3. Start running clock 
+	   4. Allow interaction
+	   		*/
+
 				return pieces;
 			}
 		}, {
 			key: 'movePiece',
-			value: function movePiece(x, y, moving) {
+			value: function movePiece(x, y) {
+				var solved = false;
+
 				// 1. get index of clicked piece
 				var indexOfClickedPiece = _Helpers2.default.getIndexOfClickedPiece(this.pieces, x, y);
 				// console.log(indexOfClickedPiece);
@@ -43279,6 +43284,7 @@
 				var canMove = _Helpers2.default.canPieceMove(this.pieces, indexOfClickedPiece, indexOfGhostPiece);
 				// console.log(canMove);
 
+
 				if (canMove) {
 					// this.pieces.forEach(p => console.log(p));
 					// 4. move
@@ -43287,6 +43293,16 @@
 					// 5. swap in array
 					this.pieces = _Helpers2.default.swapPiecesInArray(this.pieces, indexOfClickedPiece, indexOfGhostPiece);
 					// this.pieces.forEach(p => console.log(p));
+				}
+
+				//6. Check if puzzle is solved
+
+				solved = this.isSolved();
+
+				if (solved) {
+					return true;
+				} else {
+					return false;
 				}
 			}
 		}, {
@@ -43303,6 +43319,29 @@
 			key: 'getSize',
 			value: function getSize() {
 				return this.size / 2;
+			}
+		}, {
+			key: 'isSolved',
+			value: function isSolved() {
+				var i = 0,
+				    inCorrectSpot = 0,
+				    bool = false;
+
+				while (i < this.pieces.length) {
+					bool = this.pieces[i].isInPlace(i);
+					if (bool) inCorrectSpot++;
+					i++;
+				}
+
+				if (inCorrectSpot === this.pieces.length) {
+					bool = true;
+				} else {
+					bool = false;
+				}
+
+				console.log('solved: ' + bool + " inSpot: " + inCorrectSpot);
+
+				return bool;
 			}
 		}]);
 
@@ -43456,6 +43495,15 @@
 			key: 'isMoving',
 			value: function isMoving() {
 				return this.moving;
+			}
+		}, {
+			key: 'isInPlace',
+			value: function isInPlace(i) {
+				if (i === this.realIndex) {
+					return true;
+				} else {
+					return false;
+				}
 			}
 		}]);
 
@@ -43827,7 +43875,7 @@
 				// console.log(this.shapes.length);
 				for (var i = 0; i < this.shapes.length; i++) {
 					this.shapes[i].display();
-					if (this.run) this.shapes[i].update(started);
+					this.shapes[i].update();
 				}
 			}
 		}, {

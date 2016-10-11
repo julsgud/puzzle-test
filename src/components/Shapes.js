@@ -19,7 +19,7 @@ export default class Shapes {
 		// console.log(this.shapes.length);
 		for (let i = 0; i < this.shapes.length; i++) {
 			this.shapes[i].display();
-			if (this.run) this.shapes[i].update(started);
+			this.shapes[i].update();
 		}
 	}
 
