@@ -28,9 +28,13 @@ export default class Button {
 	}
 
 	display(started, solved, shapeCount, totalShapes) {
-		if (!started && !solved && shapeCount == totalShapes) this.fadeIn();
-		if (started) this.fadeOut();
-		this.grow();
+		if (!started && shapeCount == totalShapes) {
+			this.fadeIn();
+			this.grow();
+		} else {
+			this.fadeOut();
+			this.shrink();
+		}
 		p5.fill(p5.red(this.c1), p5.green(this.c1), p5.blue(this.c1), this.alpha);
 		// p5.ellipse(this.x, this.y, this.size, this.size);
 		p5.fill(255, 200);
@@ -52,12 +56,16 @@ export default class Button {
 	}
 
 	fadeOut() {
-		if (this.alpha > 0) this.alpha += this.fadeFactor;
+		if (this.alpha > 0) this.alpha -= this.fadeFactor*2;
 	}
 
 	grow() {
 		if (this.size < this.anchorSize) this.size += this.growthFactor*2;
 		// console.log(this.size + ' ' + this.buttonSize);
+	}
+
+	shrink() {
+		if (this.size > 0) this.size -= this.growthFactor*1.5;
 	}
 
 	radius() {

@@ -23,7 +23,7 @@ export default class Parallelogram {
 		p5.quad(this.x[0], this.y[0], this.x[1], this.y[1], this.x[2], this.y[2], this.x[3], this.y[3]);
 	}
 
-	update() {
+	update(started) {
 		if (this.getSizeX() > 0) {
 			this.x[0] += this.shrinkFactorX/5*3;
 		    this.x[1] -= this.shrinkFactorX/5*2;
@@ -37,7 +37,7 @@ export default class Parallelogram {
 
 		    this.alpha += this.fadeFactor;
 		} else {
-			this.initLayout(p5.width, p5.height, this.maxSizeX, this.maxSizeY);
+			if (!started) this.initLayout(p5.width, p5.height, this.maxSizeX, this.maxSizeY);
 		}
 	}
 
@@ -57,5 +57,13 @@ export default class Parallelogram {
 
 	getSizeX() {
 		return this.x[1] - this.x[0];
+	}
+
+	isAtMaxSize() {
+		if (this.getSizeX() === this.maxSizeX) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

@@ -1,31 +1,25 @@
 import Parallelogram from './Parallelogram';
 
 export default class Shapes {
-	constructor(orientation, shapeCount, duration, fps, color) {
+	constructor(orientation, size, shapeCount, duration, fps, color) {
 		this.orientation = orientation;
 		this.shapeCount = shapeCount;
 		this.duration = duration;
 		this.color = color;
 		this.fps = fps;
 		this.totalShapes = 1;
-
-		if (this.orientation == 'portrait') {
-			this.maxSizeX = p5.width/8*7;
-			this.maxSizeY = p5.width/8*7;
-		} else {
-			this.maxSizeX = p5.height/8*7.5;
-			this.maxSizeY = p5.height/8*7.5;
-		}
-		
+		this.maxSizeX = size;
+		this.maxSizeY = size;
+		this.run = true;
 		this.shapes = [];
 		this.shapes[0] = new Parallelogram(this.maxSizeX, this.maxSizeY, duration, fps, color);
 	}
 
-	display() {
+	display(started) {
 		// console.log(this.shapes.length);
 		for (let i = 0; i < this.shapes.length; i++) {
 			this.shapes[i].display();
-			this.shapes[i].update();
+			if (this.run) this.shapes[i].update(started);
 		}
 	}
 
@@ -38,5 +32,30 @@ export default class Shapes {
 
 	getSize() {
 		return this.shapes.length;
+	}
+
+	checkIfFaded() {
+		if (this.shapes.length === this.shapeCount) {
+			if (this.shapes[this.shapeCount-1].getSizeX() <= 0) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
+
+	stop() {
+		var i = 0;
+		var bool = false;
+
+		while(i < this.shapes.length || !bool) {
+			if (this.shapes[i].isAtMaxSize()){
+				// this.run = false;
+				bool = true;
+			}
+		}
+	}
+
+	isRunning() {
 	}
 }

@@ -1,5 +1,5 @@
 export default class Piece {
-	constructor(i, realIndex, size, location, backColor, frontColor, sounds) {
+	constructor(i, realIndex, size, location, backColor, frontColor, sounds, images) {
 		this.initIndex = i;
 		this.realIndex = realIndex;
 		this.size = size;
@@ -19,6 +19,9 @@ export default class Piece {
 
 		// sound
 		this.sound = sounds[realIndex];
+
+		// image
+		this.img = images[realIndex];
 	}
 
 	display() {
@@ -26,15 +29,18 @@ export default class Piece {
 			// let level = amp.getLevel();
 			// let alpha = p5.map(level, 0, 1, 0, 255);
 			// p5.fill(p5.color(p5.red(this.color), p5.green(this.color), p5.blue(this.color), alpha)); 
-			p5.fill(this.colorPlaying);
+			// p5.fill(this.colorPlaying);
+			p5.tint(200, 200);
 		} else {
-			p5.fill(this.color);
+			p5.noTint();
+			// p5.fill(this.color);
 		}
-		p5.rect(this.position.x, this.position.y, this.size, this.size);
-		p5.fill(this.textColor);
-		p5.textAlign(p5.CENTER, p5.CENTER);
-		p5.textSize(this.size/3);
-		p5.text((this.realIndex + 1).toString(), this.position.x + this.size/2, this.position.y + this.size/2);
+		// p5.rect(this.position.x, this.position.y, this.size, this.size);
+		// p5.fill(this.textColor);
+		// p5.textAlign(p5.CENTER, p5.CENTER);
+		// p5.textSize(this.size/3);
+		// p5.text((this.realIndex + 1).toString(), this.position.x + this.size/2, this.position.y + this.size/2);
+		p5.image(this.img, this.position.x, this.position.y, this.size, this.size);
 	}
 
 	update() {

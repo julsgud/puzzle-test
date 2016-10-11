@@ -92,6 +92,7 @@
 		// state
 		var started = false;
 		var solved = false;
+		var transition = false;
 
 		// components
 		var layout = void 0;
@@ -110,9 +111,9 @@
 				sounds[i] = p5.loadSound('assets/f' + i.toString() + '.mp3');
 			}
 
-			// for (let i = 0; i < sounds.length; i++) {
-			// 	images[i] = p5.loadImage('assets/i' + i.toString() + '.png');
-			// }
+			for (var _i = 0; _i < images.length; _i++) {
+				images[_i] = p5.loadImage('assets/pz' + _i.toString() + '.png');
+			}
 
 			tabacGlam = p5.loadFont('./assets/tabac_glam.ttf');
 		};
@@ -137,38 +138,61 @@
 			}
 
 			// init shapes
-			shapes = new _Shapes2.default(layout.orientation, shapeCount, 6, fps, frontColor);
+			shapes = new _Shapes2.default(layout.orientation, layout.puzzleSize * .84, shapeCount, 4, fps, frontColor);
 
 			// init button
-			button = new _Button2.default(layout.orientation, p5.width / 2, p5.height / 2, 2, fps, backColor, frontColor);
+			button = new _Button2.default(layout.orientation, p5.width / 2, p5.height / 2, 1.5, fps, backColor, frontColor);
 
 			// init puzzle
-			puzzle = new _Puzzle2.default(layout, bpm, fps, backColor, frontColor, sounds);
+			puzzle = new _Puzzle2.default(layout, bpm, fps, backColor, frontColor, sounds, images);
 		};
 
 		p5.draw = function () {
 			p5.background(p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 255));
 
 			if (!started) {
-				shapes.display();
+				shapes.display(started);
 				shapes.update();
 				if (shapes.getSize() === shapeCount) {
-					button.display();
+					button.display(started, solved, shapeCount, shapes.getSize());
 					button.update();
 				}
+				// if (transition) transition = shapes.isRunning();
 			} else {
 				puzzle.display();
 			}
+			// puzzle.display();
+
+			// p5.noFill();
+			// p5.stroke(255);
+			// p5.strokeWeight(1);
+			// p5.rect(layout.x, layout.y, layout.puzzleSize, layout.puzzleSize);
 		};
 
 		p5.touchStarted = function () {
 
 			if (!started) {
 				var distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, button.x, button.y);
-				if (!started && distance < button.radius()) started = button.bang(started);
+				if (!started && distance < button.radius()) {
+					// shapes.stop();
+					started = button.bang(started);
+					transition = true;
+				}
 			} else {
 				var _distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, puzzle.getX(), puzzle.getY());
 				if (!solved && _distance < puzzle.getSize()) puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+			}
+
+			// puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+
+			return false;
+		};
+
+		p5.keyTyped = function () {
+			console.log('ey');
+
+			if (p5.key == 's' || p5.key == 'S') {
+				p5.saveCanvas('myCanvas_.png');
 			}
 
 			return false;
@@ -43180,7 +43204,7 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Puzzle = function () {
-		function Puzzle(layout, bpm, fps, backColor, frontColor, sounds) {
+		function Puzzle(layout, bpm, fps, backColor, frontColor, sounds, images) {
 			_classCallCheck(this, Puzzle);
 
 			this.x = layout.x;
@@ -43189,7 +43213,7 @@
 			this.color = backColor;
 
 			this.pieceLocations = layout.pieceLocations;
-			this.pieces = this.createPieces(this.pieceLocations, layout.pieceSize, backColor, frontColor, sounds);
+			this.pieces = this.createPieces(this.pieceLocations, layout.pieceSize, backColor, frontColor, sounds, images);
 			this.moving = false;
 
 			// sequencer
@@ -43217,7 +43241,7 @@
 			}
 		}, {
 			key: 'createPieces',
-			value: function createPieces(pieceLocations, pieceSize, backColor, frontColor, sounds) {
+			value: function createPieces(pieceLocations, pieceSize, backColor, frontColor, sounds, images) {
 				var pieces = new Array(pieceLocations.length);
 				var randomIndices = _Helpers2.default.generateRandomIndices(pieceLocations.length);
 				var polarity = _Helpers2.default.countInversions(randomIndices);
@@ -43232,9 +43256,9 @@
 
 				for (var i = 0; i < pieceLocations.length; i++) {
 					if (randomIndices[i] === 8) {
-						pieces[i] = new _GhostPiece2.default(i, pieces.length - 1, pieceSize, pieceLocations[i], backColor, frontColor, sounds);
+						pieces[i] = new _GhostPiece2.default(i, pieces.length - 1, pieceSize, pieceLocations[i], backColor, frontColor, sounds, images);
 					} else {
-						pieces[i] = new _Piece2.default(i, randomIndices[i], pieceSize, pieceLocations[i], backColor, frontColor, sounds);
+						pieces[i] = new _Piece2.default(i, randomIndices[i], pieceSize, pieceLocations[i], backColor, frontColor, sounds, images);
 					}
 				}
 
@@ -43302,7 +43326,7 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Piece = function () {
-		function Piece(i, realIndex, size, location, backColor, frontColor, sounds) {
+		function Piece(i, realIndex, size, location, backColor, frontColor, sounds, images) {
 			_classCallCheck(this, Piece);
 
 			this.initIndex = i;
@@ -43324,6 +43348,9 @@
 
 			// sound
 			this.sound = sounds[realIndex];
+
+			// image
+			this.img = images[realIndex];
 		}
 
 		_createClass(Piece, [{
@@ -43333,15 +43360,18 @@
 					// let level = amp.getLevel();
 					// let alpha = p5.map(level, 0, 1, 0, 255);
 					// p5.fill(p5.color(p5.red(this.color), p5.green(this.color), p5.blue(this.color), alpha)); 
-					p5.fill(this.colorPlaying);
+					// p5.fill(this.colorPlaying);
+					p5.tint(200, 200);
 				} else {
-					p5.fill(this.color);
+					p5.noTint();
+					// p5.fill(this.color);
 				}
-				p5.rect(this.position.x, this.position.y, this.size, this.size);
-				p5.fill(this.textColor);
-				p5.textAlign(p5.CENTER, p5.CENTER);
-				p5.textSize(this.size / 3);
-				p5.text((this.realIndex + 1).toString(), this.position.x + this.size / 2, this.position.y + this.size / 2);
+				// p5.rect(this.position.x, this.position.y, this.size, this.size);
+				// p5.fill(this.textColor);
+				// p5.textAlign(p5.CENTER, p5.CENTER);
+				// p5.textSize(this.size/3);
+				// p5.text((this.realIndex + 1).toString(), this.position.x + this.size/2, this.position.y + this.size/2);
+				p5.image(this.img, this.position.x, this.position.y, this.size, this.size);
 			}
 		}, {
 			key: 'update',
@@ -43461,10 +43491,10 @@
 	var GhostPiece = function (_Piece) {
 		_inherits(GhostPiece, _Piece);
 
-		function GhostPiece(i, realIndex, size, location, backColor, frontColor, sounds) {
+		function GhostPiece(i, realIndex, size, location, backColor, frontColor, sounds, images) {
 			_classCallCheck(this, GhostPiece);
 
-			var _this = _possibleConstructorReturn(this, (GhostPiece.__proto__ || Object.getPrototypeOf(GhostPiece)).call(this, i, realIndex, size, location, backColor, frontColor, sounds));
+			var _this = _possibleConstructorReturn(this, (GhostPiece.__proto__ || Object.getPrototypeOf(GhostPiece)).call(this, i, realIndex, size, location, backColor, frontColor, sounds, images));
 
 			_this.initIndex = i;
 			_this.realIndex = realIndex;
@@ -43775,7 +43805,7 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Shapes = function () {
-		function Shapes(orientation, shapeCount, duration, fps, color) {
+		function Shapes(orientation, size, shapeCount, duration, fps, color) {
 			_classCallCheck(this, Shapes);
 
 			this.orientation = orientation;
@@ -43784,26 +43814,20 @@
 			this.color = color;
 			this.fps = fps;
 			this.totalShapes = 1;
-
-			if (this.orientation == 'portrait') {
-				this.maxSizeX = p5.width / 8 * 7;
-				this.maxSizeY = p5.width / 8 * 7;
-			} else {
-				this.maxSizeX = p5.height / 8 * 7.5;
-				this.maxSizeY = p5.height / 8 * 7.5;
-			}
-
+			this.maxSizeX = size;
+			this.maxSizeY = size;
+			this.run = true;
 			this.shapes = [];
 			this.shapes[0] = new _Parallelogram2.default(this.maxSizeX, this.maxSizeY, duration, fps, color);
 		}
 
 		_createClass(Shapes, [{
 			key: 'display',
-			value: function display() {
+			value: function display(started) {
 				// console.log(this.shapes.length);
 				for (var i = 0; i < this.shapes.length; i++) {
 					this.shapes[i].display();
-					this.shapes[i].update();
+					if (this.run) this.shapes[i].update(started);
 				}
 			}
 		}, {
@@ -43819,6 +43843,33 @@
 			value: function getSize() {
 				return this.shapes.length;
 			}
+		}, {
+			key: 'checkIfFaded',
+			value: function checkIfFaded() {
+				if (this.shapes.length === this.shapeCount) {
+					if (this.shapes[this.shapeCount - 1].getSizeX() <= 0) {
+						return true;
+					} else {
+						return false;
+					}
+				}
+			}
+		}, {
+			key: 'stop',
+			value: function stop() {
+				var i = 0;
+				var bool = false;
+
+				while (i < this.shapes.length || !bool) {
+					if (this.shapes[i].isAtMaxSize()) {
+						// this.run = false;
+						bool = true;
+					}
+				}
+			}
+		}, {
+			key: 'isRunning',
+			value: function isRunning() {}
 		}]);
 
 		return Shapes;
@@ -43870,7 +43921,7 @@
 			}
 		}, {
 			key: "update",
-			value: function update() {
+			value: function update(started) {
 				if (this.getSizeX() > 0) {
 					this.x[0] += this.shrinkFactorX / 5 * 3;
 					this.x[1] -= this.shrinkFactorX / 5 * 2;
@@ -43884,7 +43935,7 @@
 
 					this.alpha += this.fadeFactor;
 				} else {
-					this.initLayout(p5.width, p5.height, this.maxSizeX, this.maxSizeY);
+					if (!started) this.initLayout(p5.width, p5.height, this.maxSizeX, this.maxSizeY);
 				}
 			}
 		}, {
@@ -43906,6 +43957,15 @@
 			key: "getSizeX",
 			value: function getSizeX() {
 				return this.x[1] - this.x[0];
+			}
+		}, {
+			key: "isAtMaxSize",
+			value: function isAtMaxSize() {
+				if (this.getSizeX() === this.maxSizeX) {
+					return true;
+				} else {
+					return false;
+				}
 			}
 		}]);
 
@@ -43961,9 +44021,13 @@
 		_createClass(Button, [{
 			key: 'display',
 			value: function display(started, solved, shapeCount, totalShapes) {
-				if (!started && !solved && shapeCount == totalShapes) this.fadeIn();
-				if (started) this.fadeOut();
-				this.grow();
+				if (!started && shapeCount == totalShapes) {
+					this.fadeIn();
+					this.grow();
+				} else {
+					this.fadeOut();
+					this.shrink();
+				}
 				p5.fill(p5.red(this.c1), p5.green(this.c1), p5.blue(this.c1), this.alpha);
 				// p5.ellipse(this.x, this.y, this.size, this.size);
 				p5.fill(255, 200);
@@ -43988,13 +44052,18 @@
 		}, {
 			key: 'fadeOut',
 			value: function fadeOut() {
-				if (this.alpha > 0) this.alpha += this.fadeFactor;
+				if (this.alpha > 0) this.alpha -= this.fadeFactor * 2;
 			}
 		}, {
 			key: 'grow',
 			value: function grow() {
 				if (this.size < this.anchorSize) this.size += this.growthFactor * 2;
 				// console.log(this.size + ' ' + this.buttonSize);
+			}
+		}, {
+			key: 'shrink',
+			value: function shrink() {
+				if (this.size > 0) this.size -= this.growthFactor * 1.5;
 			}
 		}, {
 			key: 'radius',

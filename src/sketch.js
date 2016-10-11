@@ -23,6 +23,7 @@ const sketch = (p5) => {
 	// state
 	var started = false;
 	let solved = false;
+	let transition = false;
 
 	// components
 	let layout;
@@ -40,9 +41,9 @@ const sketch = (p5) => {
 			sounds[i] = p5.loadSound('assets/f' + i.toString() + '.mp3');
 		}
 
-		// for (let i = 0; i < sounds.length; i++) {
-		// 	images[i] = p5.loadImage('assets/i' + i.toString() + '.png');
-		// }
+		for (let i = 0; i < images.length; i++) {
+			images[i] = p5.loadImage('assets/pz' + i.toString() + '.png');
+		}
 
 		tabacGlam = p5.loadFont('./assets/tabac_glam.ttf');
 	}
@@ -67,41 +68,65 @@ const sketch = (p5) => {
 		}
 
 		// init shapes
-		shapes = new Shapes(layout.orientation, shapeCount, 6 , fps, frontColor);
+		shapes = new Shapes(layout.orientation, layout.puzzleSize*.84, shapeCount, 4 , fps, frontColor);
 
 		// init button
-		button = new Button(layout.orientation, p5.width/2, p5.height/2, 2, fps, backColor, frontColor);
+		button = new Button(layout.orientation, p5.width/2, p5.height/2, 1.5, fps, backColor, frontColor);
 
 		// init puzzle
-		puzzle = new Puzzle(layout, bpm, fps, backColor, frontColor, sounds);
+		puzzle = new Puzzle(layout, bpm, fps, backColor, frontColor, sounds, images);
 	}
 
 	p5.draw = () => {
 		p5.background(p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 255));
 
 		if (!started) {
-			shapes.display();
+			shapes.display(started);
 			shapes.update();
 			if (shapes.getSize() === shapeCount) {
-				button.display();
+				button.display(started, solved, shapeCount, shapes.getSize());
 				button.update();
 			}
+			// if (transition) transition = shapes.isRunning();
 		} else {
 			puzzle.display();
 		}
+		// puzzle.display();
+
+		// p5.noFill();
+		// p5.stroke(255);
+		// p5.strokeWeight(1);
+		// p5.rect(layout.x, layout.y, layout.puzzleSize, layout.puzzleSize);
 	}
 
 	p5.touchStarted = () => {
 
 		if (!started) {
 			let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, button.x, button.y);
-			if (!started && distance < button.radius()) started = button.bang(started);
+			if (!started && distance < button.radius()) {
+				// shapes.stop();
+				started = button.bang(started);	
+				transition = true;
+			} 
 		} else {
 			let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, puzzle.getX(), puzzle.getY());
 			if (!solved && distance < puzzle.getSize()) puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 		}
 
+		// puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+
 		return false;
+	}
+
+	p5.keyTyped = () => {
+		console.log('ey');
+  
+	  if (p5.key == 's' || p5.key == 'S') {
+	    p5.saveCanvas('myCanvas_.png');
+	  }
+  
+	  return false;
+	  
 	}	
 }
 
