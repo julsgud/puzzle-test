@@ -72,9 +72,6 @@ const sketch = (p5) => {
 
 		// init button
 		button = new Button(layout, p5.width/2, p5.height/2, 1.5, fps, backColor, frontColor);
-
-		// init puzzle
-		puzzle = new Puzzle(layout, bpm, fps, backColor, frontColor, sounds, images);
 	}
 
 	p5.draw = () => {
@@ -97,8 +94,9 @@ const sketch = (p5) => {
 		if (!started) {
 			let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, button.x, button.y);
 			if (!started && distance < button.radius()) {
-				started = button.bang(started);	
-				// transition = true;
+				started = button.bang(started);
+				// init puzzle
+				puzzle = new Puzzle(layout, bpm, fps, backColor, frontColor, sounds, images);
 			} 
 		} else {
 			let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, puzzle.getX(), puzzle.getY());
