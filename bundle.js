@@ -141,7 +141,7 @@
 			shapes = new _Shapes2.default(layout.orientation, layout.puzzleSize * .84, shapeCount, 4, fps, frontColor);
 
 			// init button
-			button = new _Button2.default(layout.orientation, p5.width / 2, p5.height / 2, 1.5, fps, backColor, frontColor);
+			button = new _Button2.default(layout, p5.width / 2, p5.height / 2, 1.5, fps, backColor, frontColor);
 
 			// init puzzle
 			puzzle = new _Puzzle2.default(layout, bpm, fps, backColor, frontColor, sounds, images);
@@ -43602,6 +43602,10 @@
 		initPortrait: function initPortrait(w, h, spaces) {
 			var that = {};
 
+			if (w > 612) {
+				w = 612;
+			}
+
 			// layout variables
 			that.orientation = 'portrait';
 			that.frameX = 0;
@@ -43617,14 +43621,28 @@
 
 		initLandscape: function initLandscape(w, h, spaces) {
 			var that = {};
+			// dont want the puzzle to be too big
+			var originalHeight = h;
+			var heightDifference = void 0;
+
+			if (originalHeight > 612) {
+				heightDifference = h - 612;
+				h = 612;
+			}
 
 			that.orientation = 'landscape';
 			that.frameX = (w - h) / 2;
-			that.frameY = 0;
+
+			if (originalHeight > 612) {
+				that.frameY = Math.floor(heightDifference / 2);
+			} else {
+				that.frameY = 0;
+			}
+
 			that.puzzleSize = h;
 			that.x = that.frameX;
-			that.y = 0;
-			that.pieceSize = that.puzzleSize / Math.sqrt(spaces);
+			that.y = that.frameY;
+			that.pieceSize = Math.floor(that.puzzleSize / Math.sqrt(spaces));
 			that.pieceLocations = this.getPieceLocations(spaces, that.frameX, that.frameY, that.puzzleSize);
 
 			return that;
@@ -44037,16 +44055,16 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Button = function () {
-		function Button(orientation, x, y, duration, fps, c1, c2) {
+		function Button(layout, x, y, duration, fps, c1, c2) {
 			_classCallCheck(this, Button);
 
 			this.x = x;
 			this.y = y;
 			this.buttonSize = 0;
-			if (orientation == 'portrait') {
-				this.buttonSize = p5.width / 8;
+			if (layout.orientation == 'portrait') {
+				this.buttonSize = layout.puzzleSize / 8;
 			} else {
-				this.buttonSize = p5.height / 8;
+				this.buttonSize = layout.puzzleSize / 8;
 			}
 			this.size = 0;
 			this.anchorSize = this.buttonSize;
