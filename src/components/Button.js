@@ -1,12 +1,12 @@
 export default class Button {
-	constructor(orientation, x, y, duration, fps, c1, c2) {
+	constructor(layout, x, y, duration, fps, c1, c2) {
 		this.x = x;
 		this.y = y;
 		this.buttonSize = 0;
-		if (orientation == 'portrait') {
-			this.buttonSize = p5.width/8;
+		if (layout.orientation == 'portrait') {
+			this.buttonSize = layout.puzzleSize/8;
 		} else {
-			this.buttonSize = p5.height/8;
+			this.buttonSize = layout.puzzleSize/8;
 		}
 		this.size = 0;
 		this.anchorSize = this.buttonSize;

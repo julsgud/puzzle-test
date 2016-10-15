@@ -71,7 +71,7 @@ const sketch = (p5) => {
 		shapes = new Shapes(layout.orientation, layout.puzzleSize*.84, shapeCount, 4 , fps, frontColor);
 
 		// init button
-		button = new Button(layout.orientation, p5.width/2, p5.height/2, 1.5, fps, backColor, frontColor);
+		button = new Button(layout, p5.width/2, p5.height/2, 1.5, fps, backColor, frontColor);
 
 		// init puzzle
 		puzzle = new Puzzle(layout, bpm, fps, backColor, frontColor, sounds, images);

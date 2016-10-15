@@ -2,6 +2,10 @@ const Helpers = {
 	initPortrait: function(w, h, spaces) {
 		let that = {};
 
+		if (w > 612) {
+			w = 612;
+		}
+
 		// layout variables
 		that.orientation = 'portrait';
 		that.frameX = 0;
@@ -17,14 +21,28 @@ const Helpers = {
 
 	initLandscape: function(w, h, spaces) {
 		let that = {};
+		// dont want the puzzle to be too big
+		let originalHeight = h;
+		let heightDifference;
+
+		if (originalHeight > 612) {
+			heightDifference = h - 612;
+			h = 612;
+		}
 
 		that.orientation = 'landscape';
 		that.frameX = (w - h)/2;
-		that.frameY = 0;
+
+		if (originalHeight > 612) {
+			that.frameY = Math.floor(heightDifference/2);
+		} else {
+			that.frameY = 0;
+		}
+		
 		that.puzzleSize = h;
 		that.x = that.frameX;
-		that.y = 0;
-		that.pieceSize = that.puzzleSize/Math.sqrt(spaces);
+		that.y = that.frameY;
+		that.pieceSize = Math.floor(that.puzzleSize/Math.sqrt(spaces));
 		that.pieceLocations = this.getPieceLocations(spaces, that.frameX, that.frameY, that.puzzleSize);
 
 		return that;
