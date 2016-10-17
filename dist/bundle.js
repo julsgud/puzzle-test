@@ -171,6 +171,7 @@
 			} else {
 				var _distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, puzzle.getX(), puzzle.getY());
 				if (!solved && _distance < puzzle.getSize()) {
+					console.log(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 					solved = puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 				}
 			}

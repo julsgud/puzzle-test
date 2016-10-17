@@ -53,27 +53,6 @@ export default class Puzzle {
 			}
 		}
 
-		/*
-		for (var i = 0; i < piecesLocations.length; i++) {
-			if (i < 8) {
-				pieces[i] = new Piece(i, randomIndi)
-			} else { 
-
-			}
-		}
-
-
-		*/
-
-		/*
-		Init puzzle without creating pieces
-		On start flag:
-		1. Create pieces in correct place
-		2. Use (alternate!?) movePiece method to move each to its shuffled spot
-		3. Start running clock 
-		4. Allow interaction
-		*/
-
 		return pieces;
 	}
 

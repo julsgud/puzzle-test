@@ -105,8 +105,6 @@ const sketch = (p5) => {
 			}
 		}
 
-		// puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
-
 		return false;
 	}
 

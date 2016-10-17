@@ -12,7 +12,7 @@ const Helpers = {
 		that.orientation = 'portrait';
 
 		if (originalWidth > 612) {
-			that.frameX = Math.floor(widthDifference/2);
+			that.frameX = Math.ceil(widthDifference/2);
 		} else {
 			that.frameX = 0;
 		}
@@ -41,7 +41,7 @@ const Helpers = {
 		that.frameX = (w - h)/2;
 
 		if (originalHeight > 612) {
-			that.frameY = Math.floor(heightDifference/2);
+			that.frameY = Math.ceil(heightDifference/2);
 		} else {
 			that.frameY = 0;
 		}
