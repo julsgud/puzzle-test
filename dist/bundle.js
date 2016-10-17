@@ -142,9 +142,6 @@
 
 			// init button
 			button = new _Button2.default(layout, p5.width / 2, p5.height / 2, 1.5, fps, backColor, frontColor);
-
-			// init puzzle
-			puzzle = new _Puzzle2.default(layout, bpm, fps, backColor, frontColor, sounds, images);
 		};
 
 		p5.draw = function () {
@@ -168,7 +165,8 @@
 				var distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, button.x, button.y);
 				if (!started && distance < button.radius()) {
 					started = button.bang(started);
-					// transition = true;
+					// init puzzle
+					puzzle = new _Puzzle2.default(layout, bpm, fps, backColor, frontColor, sounds, images);
 				}
 			} else {
 				var _distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, puzzle.getX(), puzzle.getY());
@@ -43257,13 +43255,22 @@
 				}
 
 				/*
+	   for (var i = 0; i < piecesLocations.length; i++) {
+	   	if (i < 8) {
+	   		pieces[i] = new Piece(i, randomIndi)
+	   	} else { 
+	   		}
+	   }
+	   		*/
+
+				/*
 	   Init puzzle without creating pieces
 	   On start flag:
 	   1. Create pieces in correct place
 	   2. Use (alternate!?) movePiece method to move each to its shuffled spot
 	   3. Start running clock 
 	   4. Allow interaction
-	   		*/
+	   */
 
 				return pieces;
 			}
@@ -43296,7 +43303,6 @@
 				}
 
 				//6. Check if puzzle is solved
-
 				solved = this.isSolved();
 
 				if (solved) {
@@ -43601,17 +43607,25 @@
 	var Helpers = {
 		initPortrait: function initPortrait(w, h, spaces) {
 			var that = {};
+			var originalWidth = w;
+			var widthDifference = void 0;
 
-			if (w > 612) {
+			if (originalWidth > 612) {
+				widthDifference = w - 612;
 				w = 612;
 			}
 
-			// layout variables
 			that.orientation = 'portrait';
-			that.frameX = 0;
+
+			if (originalWidth > 612) {
+				that.frameX = Math.floor(widthDifference / 2);
+			} else {
+				that.frameX = 0;
+			}
+
 			that.frameY = (h - w) / 2;
 			that.puzzleSize = w;
-			that.x = 0;
+			that.x = that.frameX;
 			that.y = that.frameY;
 			that.pieceSize = that.puzzleSize / Math.sqrt(spaces);
 			that.pieceLocations = this.getPieceLocations(spaces, that.frameX, that.frameY, that.puzzleSize);
@@ -43621,7 +43635,6 @@
 
 		initLandscape: function initLandscape(w, h, spaces) {
 			var that = {};
-			// dont want the puzzle to be too big
 			var originalHeight = h;
 			var heightDifference = void 0;
 
