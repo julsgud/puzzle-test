@@ -45,22 +45,22 @@ export default class Puzzle {
 			// console.log(Helpers.isEven(polarity));
 		}
 
-		// for (var i = 0; i < pieceLocations.length; i++) {
-		// 	if (randomIndices[i] === 8) {
-		// 		pieces[i] = new GhostPiece(i, pieces.length-1, pieceSize, pieceLocations[i], backColor, frontColor, sounds, images);
-		// 	} else {
-		// 		pieces[i] = new Piece(i, randomIndices[i], pieceSize, pieceLocations[i], backColor, frontColor, sounds, images);
-		// 	}
-		// }
-
-		
 		for (var i = 0; i < pieceLocations.length; i++) {
-			if (i < pieceLocations.length-1) {
-				pieces[i] = new Piece(i, randomIndices[i], pieceSize, pieceLocations[i], pieceLocations[randomIndices[i]], backColor, frontColor, sounds, images);
-			} else { 
-				pieces[i] = new GhostPiece(i, pieces.length-1, pieceSize, pieceLocations[i], pieceLocations[randomIndices[i]], backColor, frontColor, sounds, images);
+			if (randomIndices[i] === 8) {
+				pieces[i] = new GhostPiece(i, pieces.length-1, pieceSize, pieceLocations[i], backColor, frontColor, sounds, images);
+			} else {
+				pieces[i] = new Piece(i, randomIndices[i], pieceSize, pieceLocations[i], backColor, frontColor, sounds, images);
 			}
 		}
+
+		
+		// for (var i = 0; i < pieceLocations.length; i++) {
+		// 	if (i < pieceLocations.length-1) {
+		// 		pieces[i] = new Piece(i, randomIndices[i], pieceSize, pieceLocations[i], pieceLocations[randomIndices[i]], backColor, frontColor, sounds, images);
+		// 	} else { 
+		// 		pieces[i] = new GhostPiece(i, pieces.length-1, pieceSize, pieceLocations[i], pieceLocations[randomIndices[i]], backColor, frontColor, sounds, images);
+		// 	}
+		// }
 
 		/*
 		Init puzzle without creating pieces
@@ -108,10 +108,6 @@ export default class Puzzle {
 		} else {
 			return false;
 		}
-	}
-
-	arrangePiece(pieceIndex) {
-		this.pieces[pieceIndex].()
 	}
 
 	getX() {

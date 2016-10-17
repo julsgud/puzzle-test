@@ -111,7 +111,6 @@ const sketch = (p5) => {
 	}
 
 	p5.keyTyped = () => {
-		console.log('ey');
   
 	  if (p5.key == 's' || p5.key == 'S') {
 	    p5.saveCanvas('myCanvas_.png');

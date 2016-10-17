@@ -18,10 +18,10 @@ export default class Piece {
 		this.moving = false;
 
 		// sound
-		this.sound = sounds[this.initIndex];
+		this.sound = sounds[this.realIndex];
 
 		// image
-		this.img = images[this.initIndex];
+		this.img = images[this.realIndex];
 	}
 
 	display() {
