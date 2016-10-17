@@ -1,15 +1,15 @@
 export default class Piece {
-	constructor(i, realIndex, size, location, backColor, frontColor, sounds, images) {
+	constructor(i, realIndex, size, location, toLoc, backColor, frontColor, sounds, images) {
 		this.initIndex = i;
 		this.realIndex = realIndex;
 		this.size = size;
 		this.color = frontColor;
 		this.colorPlaying = p5.color(p5.red(this.color), p5.green(frontColor), p5.blue(frontColor), 200);
 		this.textColor = p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 222);
-		this.playingColor = '#f00';
 
 		// movement
 		this.position = p5.createVector(location.x, location.y);
+		this.initTarget = p5.createVector(toLoc.x, toLoc.y);
 		this.target = p5.createVector(0, 0);
 		this.direction = p5.createVector(0, 0);
 		this.velocity = p5.createVector(0, 0);
@@ -18,10 +18,10 @@ export default class Piece {
 		this.moving = false;
 
 		// sound
-		this.sound = sounds[realIndex];
+		this.sound = sounds[this.initIndex];
 
 		// image
-		this.img = images[realIndex];
+		this.img = images[this.initIndex];
 	}
 
 	display() {
@@ -72,6 +72,7 @@ export default class Piece {
 
 	play() {
 		this.sound.play();
+		console.log('initIndex: ' + this.initIndex + '/ realIndex: ' + this.realIndex);
 	}
 
 	prepMovement(destination) {

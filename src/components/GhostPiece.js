@@ -1,8 +1,8 @@
 import Piece from './Piece';
 
 export default class GhostPiece extends Piece {
-	constructor(i, realIndex, size, location, backColor, frontColor, sounds, images) {
-		super(i, realIndex, size, location, backColor, frontColor, sounds, images);
+	constructor(i, realIndex, size, location, toLoc, backColor, frontColor, sounds, images) {
+		super(i, realIndex, size, location, toLoc, backColor, frontColor, sounds, images);
 		this.initIndex = i;
 		this.realIndex = realIndex;
 		this.size = size;
@@ -13,7 +13,7 @@ export default class GhostPiece extends Piece {
 		this.target = p5.createVector(0, 0);
 		this.moving = false;
 
-		// use index to load image and sound to piece
+		// no sound or image
 		this.sound = null;
 	}
 
