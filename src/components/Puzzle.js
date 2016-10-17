@@ -13,17 +13,26 @@ export default class Puzzle {
 
 		this.pieceLocations = layout.pieceLocations;
 		this.pieces = this.createPieces(this.pieceLocations, layout.pieceSize, backColor, frontColor, sounds, images);
-		this.moving = false;
+		this.arranging = true;
+		this.pieceToArrange = 0;
 
 		// sequencer
 		this.clock = new Clock(bpm, fps);
 	}
 
-	display() {
-		this.clock.run(this.pieces, GhostPiece);
-		this.displayBoard();
-		this.pieces.forEach(p => p.update());
-		this.pieces.forEach(p => p.display());
+	display(started, transition) {
+		if (started && !transition) {
+			this.clock.run(this.pieces, GhostPiece);
+			this.displayBoard();
+			if (this.arranging) {
+				if (this.pieces[this.pieceToArrange].playCount === 1 && !this.pieces[this.pieceToArrange].isPlaying()) {
+					this.arrange(this.pieceToArrange);
+					this.pieceToArrange++;
+				}
+			}
+			this.pieces.forEach(p => p.update());
+			this.pieces.forEach(p => p.display());
+		}
 	}
 
 	displayBoard() {
@@ -61,15 +70,6 @@ export default class Puzzle {
 				pieces[i] = new GhostPiece(i, pieces.length-1, pieceSize, pieceLocations[i], pieceLocations[randomIndices[i]], backColor, frontColor, sounds, images);
 			}
 		}
-
-		/*
-		Init puzzle without creating pieces
-		On start flag:
-		1. Create pieces in correct place
-		2. Use (alternate!?) movePiece method to move each to its shuffled spot
-		3. Start running clock 
-		4. Allow interaction
-		*/
 
 		return pieces;
 	}
@@ -110,8 +110,18 @@ export default class Puzzle {
 		}
 	}
 
-	arrangePiece(pieceIndex) {
-		this.pieces[pieceIndex].()
+	arrange(pieceIndex) {
+		console.log(this.pieceLocations[this.pieces[pieceIndex].randomIndex]);
+		this.pieces[pieceIndex].prepArrangement(this.pieceLocations[this.pieces[pieceIndex].randomIndex]);
+	}
+
+	playIntro() {
+		this.clock.play(this.pieces[this.pieces.length-2]);
+	}
+
+	measureLengthInMs() {
+		console.log(this.clock.measure);
+		return this.clock.measure;
 	}
 
 	getX() {

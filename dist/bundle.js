@@ -54,7 +54,7 @@
 
 	__webpack_require__(3);
 
-	var _Puzzle = __webpack_require__(!(function webpackMissingModule() { var e = new Error("Cannot find module \"./components/Puzzle\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()));
+	var _Puzzle = __webpack_require__(4);
 
 	var _Puzzle2 = _interopRequireDefault(_Puzzle);
 
@@ -62,15 +62,15 @@
 
 	var _Piece2 = _interopRequireDefault(_Piece);
 
-	var _Helpers = __webpack_require__(6);
+	var _Helpers = __webpack_require__(7);
 
 	var _Helpers2 = _interopRequireDefault(_Helpers);
 
-	var _Shapes = __webpack_require__(7);
+	var _Shapes = __webpack_require__(9);
 
 	var _Shapes2 = _interopRequireDefault(_Shapes);
 
-	var _Button = __webpack_require__(9);
+	var _Button = __webpack_require__(11);
 
 	var _Button2 = _interopRequireDefault(_Button);
 
@@ -43164,7 +43164,202 @@
 
 
 /***/ },
-/* 4 */,
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _Piece = __webpack_require__(5);
+
+	var _Piece2 = _interopRequireDefault(_Piece);
+
+	var _GhostPiece = __webpack_require__(6);
+
+	var _GhostPiece2 = _interopRequireDefault(_GhostPiece);
+
+	var _Helpers = __webpack_require__(7);
+
+	var _Helpers2 = _interopRequireDefault(_Helpers);
+
+	var _Clock = __webpack_require__(8);
+
+	var _Clock2 = _interopRequireDefault(_Clock);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Puzzle = function () {
+		function Puzzle(layout, bpm, fps, backColor, frontColor, sounds, images) {
+			_classCallCheck(this, Puzzle);
+
+			this.x = layout.x;
+			this.y = layout.y;
+			this.size = layout.puzzleSize;
+			this.color = backColor;
+
+			this.pieceLocations = layout.pieceLocations;
+			this.pieces = this.createPieces(this.pieceLocations, layout.pieceSize, backColor, frontColor, sounds, images);
+			this.moving = false;
+
+			// sequencer
+			this.clock = new _Clock2.default(bpm, fps);
+		}
+
+		_createClass(Puzzle, [{
+			key: 'display',
+			value: function display() {
+				this.clock.run(this.pieces, _GhostPiece2.default);
+				this.displayBoard();
+				this.pieces.forEach(function (p) {
+					return p.update();
+				});
+				this.pieces.forEach(function (p) {
+					return p.display();
+				});
+			}
+		}, {
+			key: 'displayBoard',
+			value: function displayBoard() {
+				p5.fill(255);
+				p5.noStroke();
+				p5.rect(this.x, this.y, this.size, this.size);
+			}
+		}, {
+			key: 'createPieces',
+			value: function createPieces(pieceLocations, pieceSize, backColor, frontColor, sounds, images) {
+				var pieces = new Array(pieceLocations.length);
+				var randomIndices = _Helpers2.default.generateRandomIndices(pieceLocations.length);
+				var polarity = _Helpers2.default.countInversions(randomIndices);
+
+				// make sure puzzle is solvable, see Helpers.js for more info
+				while (!_Helpers2.default.isEven(polarity)) {
+					randomIndices = _Helpers2.default.generateRandomIndices(pieceLocations.length);
+					polarity = _Helpers2.default.countInversions(randomIndices);
+					// console.log(polarity);
+					// console.log(Helpers.isEven(polarity));
+				}
+
+				// for (var i = 0; i < pieceLocations.length; i++) {
+				// 	if (randomIndices[i] === 8) {
+				// 		pieces[i] = new GhostPiece(i, pieces.length-1, pieceSize, pieceLocations[i], backColor, frontColor, sounds, images);
+				// 	} else {
+				// 		pieces[i] = new Piece(i, randomIndices[i], pieceSize, pieceLocations[i], backColor, frontColor, sounds, images);
+				// 	}
+				// }
+
+
+				for (var i = 0; i < pieceLocations.length; i++) {
+					if (i < pieceLocations.length - 1) {
+						pieces[i] = new _Piece2.default(i, randomIndices[i], pieceSize, pieceLocations[i], pieceLocations[randomIndices[i]], backColor, frontColor, sounds, images);
+					} else {
+						pieces[i] = new _GhostPiece2.default(i, pieces.length - 1, pieceSize, pieceLocations[i], pieceLocations[randomIndices[i]], backColor, frontColor, sounds, images);
+					}
+				}
+
+				/*
+	   Init puzzle without creating pieces
+	   On start flag:
+	   1. Create pieces in correct place
+	   2. Use (alternate!?) movePiece method to move each to its shuffled spot
+	   3. Start running clock 
+	   4. Allow interaction
+	   */
+
+				return pieces;
+			}
+		}, {
+			key: 'movePiece',
+			value: function movePiece(x, y) {
+				var solved = false;
+
+				// 1. get index of clicked piece
+				var indexOfClickedPiece = _Helpers2.default.getIndexOfClickedPiece(this.pieces, x, y);
+				// console.log(indexOfClickedPiece);
+
+				// 2. get index of ghost piece
+				var indexOfGhostPiece = _Helpers2.default.getIndexOfGhostPiece(this.pieces, _GhostPiece2.default);
+				// console.log(indexOfGhostPiece);
+
+				// 3. if piece is not ghost piece, check if it can move
+				var canMove = _Helpers2.default.canPieceMove(this.pieces, indexOfClickedPiece, indexOfGhostPiece);
+				// console.log(canMove);
+
+
+				if (canMove) {
+					// this.pieces.forEach(p => console.log(p));
+					// 4. move
+					this.pieces[indexOfClickedPiece].prepMovement(this.pieces[indexOfGhostPiece].getPosition());
+					this.pieces[indexOfGhostPiece].prepMovement(this.pieces[indexOfClickedPiece].getPosition());
+					// 5. swap in array
+					this.pieces = _Helpers2.default.swapPiecesInArray(this.pieces, indexOfClickedPiece, indexOfGhostPiece);
+					// this.pieces.forEach(p => console.log(p));
+				}
+
+				//6. Check if puzzle is solved
+				solved = this.isSolved();
+
+				if (solved) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}, {
+			key: 'arrange',
+			value: function arrange(pieceIndex) {}
+		}, {
+			key: 'getX',
+			value: function getX() {
+				return this.x + this.size / 2;
+			}
+		}, {
+			key: 'getY',
+			value: function getY() {
+				return this.y + this.size / 2;
+			}
+		}, {
+			key: 'getSize',
+			value: function getSize() {
+				return this.size / 2;
+			}
+		}, {
+			key: 'isSolved',
+			value: function isSolved() {
+				var i = 0,
+				    inCorrectSpot = 0,
+				    bool = false;
+
+				while (i < this.pieces.length) {
+					bool = this.pieces[i].isInPlace(i);
+					if (bool) inCorrectSpot++;
+					i++;
+				}
+
+				if (inCorrectSpot === this.pieces.length) {
+					bool = true;
+				} else {
+					bool = false;
+				}
+
+				console.log('solved: ' + bool + " inSpot: " + inCorrectSpot);
+
+				return bool;
+			}
+		}]);
+
+		return Puzzle;
+	}();
+
+	exports.default = Puzzle;
+
+/***/ },
 /* 5 */
 /***/ function(module, exports) {
 
@@ -43179,11 +43374,11 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Piece = function () {
-		function Piece(i, realIndex, size, location, toLoc, backColor, frontColor, sounds, images) {
+		function Piece(i, randomIndex, size, location, toLoc, backColor, frontColor, sounds, images) {
 			_classCallCheck(this, Piece);
 
 			this.initIndex = i;
-			this.realIndex = realIndex;
+			this.randomIndex = randomIndex;
 			this.size = size;
 			this.color = frontColor;
 			this.colorPlaying = p5.color(p5.red(this.color), p5.green(frontColor), p5.blue(frontColor), 200);
@@ -43258,7 +43453,7 @@
 			key: 'play',
 			value: function play() {
 				this.sound.play();
-				console.log('initIndex: ' + this.initIndex + '/ realIndex: ' + this.realIndex);
+				console.log('initIndex: ' + this.initIndex + '/ randomIndex: ' + this.randomIndex);
 			}
 		}, {
 			key: 'prepMovement',
@@ -43290,7 +43485,7 @@
 		}, {
 			key: 'getRealIndex',
 			value: function getRealIndex() {
-				return this.realIndex;
+				return this.randomIndex;
 			}
 		}, {
 			key: 'getPosition',
@@ -43314,7 +43509,7 @@
 		}, {
 			key: 'isInPlace',
 			value: function isInPlace(i) {
-				if (i === this.realIndex) {
+				if (i === this.randomIndex) {
 					return true;
 				} else {
 					return false;
@@ -43329,6 +43524,83 @@
 
 /***/ },
 /* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _Piece2 = __webpack_require__(5);
+
+	var _Piece3 = _interopRequireDefault(_Piece2);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+	var GhostPiece = function (_Piece) {
+		_inherits(GhostPiece, _Piece);
+
+		function GhostPiece(i, realIndex, size, location, toLoc, backColor, frontColor, sounds, images) {
+			_classCallCheck(this, GhostPiece);
+
+			var _this = _possibleConstructorReturn(this, (GhostPiece.__proto__ || Object.getPrototypeOf(GhostPiece)).call(this, i, realIndex, size, location, toLoc, backColor, frontColor, sounds, images));
+
+			_this.initIndex = i;
+			_this.realIndex = realIndex;
+			_this.size = size;
+			_this.color = p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 128);
+
+			// movement
+			_this.position = p5.createVector(location.x, location.y);
+			_this.target = p5.createVector(0, 0);
+			_this.moving = false;
+
+			// no sound or image
+			_this.sound = null;
+			return _this;
+		}
+
+		_createClass(GhostPiece, [{
+			key: 'display',
+			value: function display() {
+				p5.fill(this.color, 0);
+				p5.rect(this.position.x, this.position.y, this.size, this.size);
+			}
+		}, {
+			key: 'prepMovement',
+			value: function prepMovement(destination) {
+				// 1. update helper vectors
+				this.target = destination.copy();
+
+				// 2. raise movement flag
+				this.moving = true;
+			}
+		}, {
+			key: 'update',
+			value: function update() {
+				if (this.moving) {
+					this.position = this.target.copy();
+					this.moving = false;
+				}
+			}
+		}]);
+
+		return GhostPiece;
+	}(_Piece3.default);
+
+	exports.default = GhostPiece;
+
+/***/ },
+/* 7 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -43526,7 +43798,79 @@
 	exports.default = Helpers;
 
 /***/ },
-/* 7 */
+/* 8 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Clock = function () {
+		function Clock(bpm, fps) {
+			_classCallCheck(this, Clock);
+
+			this.bpm = bpm;
+			this.quarterNote = 60000 / this.bpm;
+			this.measure = Math.floor(this.quarterNote * 4);
+			this.currentPiece = 0;
+			this.lastTime = 0;
+		}
+
+		_createClass(Clock, [{
+			key: "run",
+			value: function run(pieces, GhostPiece) {
+
+				/* on run, play next piece if a full measure
+	   has elapsed since last event*/
+				if (p5.millis() - this.lastTime >= this.measure) {
+
+					/* if ghostpiece is next, skip*/
+					if (pieces[this.currentPiece] instanceof GhostPiece) {
+						this.currentPiece++;
+						// wrap piece index when ghost piece is in last spot
+						if (this.currentPiece > pieces.length - 1) this.currentPiece %= pieces.length;
+					} else {}
+					pieces[this.currentPiece].play();
+					this.currentPiece++;
+					this.currentPiece %= pieces.length;
+					this.lastTime = p5.millis();
+				}
+
+				// if (this.ms < this.margin && ) {
+				// 	// console.log('bang' + ' ' + this.currentPiece + ' ' + this.ms);
+				// 	if (pieces[this.currentPiece] instanceof GhostPiece) {
+				// 		this.currentPiece++;
+				// 		pieces[this.currentPiece].play();
+				// 		this.currentPiece++;
+				// 	} else {
+				// 		pieces[this.currentPiece].play(); 
+				// 		this.currentPiece++;
+				// 	}
+				// 	this.currentPiece %= pieces.length;
+				// } else if (this.ms < this.margin*1.3) {
+				// 	console.log(this.ms);
+				// }
+			}
+		}, {
+			key: "play",
+			value: function play(piece) {
+				piece.play();
+			}
+		}]);
+
+		return Clock;
+	}();
+
+	exports.default = Clock;
+
+/***/ },
+/* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -43537,7 +43881,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _Parallelogram = __webpack_require__(8);
+	var _Parallelogram = __webpack_require__(10);
 
 	var _Parallelogram2 = _interopRequireDefault(_Parallelogram);
 
@@ -43619,7 +43963,7 @@
 	exports.default = Shapes;
 
 /***/ },
-/* 8 */
+/* 10 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -43716,7 +44060,7 @@
 	exports.default = Parallelogram;
 
 /***/ },
-/* 9 */
+/* 11 */
 /***/ function(module, exports) {
 
 	'use strict';

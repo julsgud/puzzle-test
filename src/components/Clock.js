@@ -45,7 +45,7 @@ export default class Clock {
 		// }
 	}
 
-	stop() {
-
+	play(piece) {
+		piece.play();
 	}
 }

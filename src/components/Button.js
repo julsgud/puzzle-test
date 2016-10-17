@@ -4,9 +4,9 @@ export default class Button {
 		this.y = y;
 		this.buttonSize = 0;
 		if (layout.orientation == 'portrait') {
-			this.buttonSize = layout.puzzleSize/8;
+			this.buttonSize = layout.puzzleSize/6;
 		} else {
-			this.buttonSize = layout.puzzleSize/8;
+			this.buttonSize = layout.puzzleSize/6;
 		}
 		this.size = 0;
 		this.anchorSize = this.buttonSize;
@@ -27,11 +27,11 @@ export default class Button {
 
 	}
 
-	display(started, solved, shapeCount, totalShapes) {
-		if (!started && shapeCount == totalShapes) {
+	display(started, transition, shapeCount, totalShapes) {
+		if (!started && shapeCount == totalShapes || !transition) {
 			this.fadeIn();
 			this.grow();
-		} else {
+		} else if (transition) {
 			this.fadeOut();
 			this.shrink();
 		}
@@ -56,7 +56,7 @@ export default class Button {
 	}
 
 	fadeOut() {
-		if (this.alpha > 0) this.alpha -= this.fadeFactor*2;
+		if (this.alpha > 0) this.alpha -= this.fadeFactor;
 	}
 
 	grow() {
@@ -65,14 +65,22 @@ export default class Button {
 	}
 
 	shrink() {
-		if (this.size > 0) this.size -= this.growthFactor*1.5;
+		if (this.size > 0) this.size -= this.growthFactor*1.3;
 	}
 
 	radius() {
 		return this.anchorSize;
 	}
 
-	bang(started) {
-		if (!started) return true;
+	bang() {
+		return true;
+	}
+
+	isDead() {
+		if (this.size <= 0) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 }

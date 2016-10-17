@@ -12,6 +12,7 @@ export default class GhostPiece extends Piece {
 		this.position = p5.createVector(location.x, location.y);
 		this.target = p5.createVector(0, 0);
 		this.moving = false;
+		this.ready = false;
 
 		// no sound or image
 		this.sound = null;

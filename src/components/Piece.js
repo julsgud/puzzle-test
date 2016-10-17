@@ -1,7 +1,7 @@
 export default class Piece {
-	constructor(i, realIndex, size, location, toLoc, backColor, frontColor, sounds, images) {
+	constructor(i, randomIndex, size, location, toLoc, backColor, frontColor, sounds, images) {
 		this.initIndex = i;
-		this.realIndex = realIndex;
+		this.randomIndex = randomIndex;
 		this.size = size;
 		this.color = frontColor;
 		this.colorPlaying = p5.color(p5.red(this.color), p5.green(frontColor), p5.blue(frontColor), 200);
@@ -16,6 +16,8 @@ export default class Piece {
 		this.acceleration = p5.createVector(0, 0);
 		this.speedLimit = p5.width/13;
 		this.moving = false;
+		this.ready = false;
+		this.playCount = 0;
 
 		// sound
 		this.sound = sounds[this.initIndex];
@@ -72,10 +74,29 @@ export default class Piece {
 
 	play() {
 		this.sound.play();
-		console.log('initIndex: ' + this.initIndex + '/ realIndex: ' + this.realIndex);
+		this.playCount++;
+		console.log('initIndex: ' + this.initIndex + '/ randomIndex: ' + this.randomIndex);
 	}
 
 	prepMovement(destination) {
+		// 1. update helper vectors
+		this.target = destination.copy();
+		this.dest = destination.copy();
+		this.dest.sub(this.position);
+		// console.log(this.dest);
+
+		// create direction from difference between position and target
+		let direction = this.dest.copy();
+		direction.normalize();
+		this.acceleration = direction.copy();
+		//console.log(this.acceleration);
+
+		// 2. raise movement flag
+		this.moving = true;
+	}
+
+	prepArrangement(dest) {
+		let destination = p5.createVector(dest.x, dest.y);
 		// 1. update helper vectors
 		this.target = destination.copy();
 		this.dest = destination.copy();
@@ -101,7 +122,7 @@ export default class Piece {
 	}
 
 	getRealIndex() {
-		return this.realIndex;
+		return this.randomIndex;
 	}
 
 	getPosition() {
@@ -121,10 +142,14 @@ export default class Piece {
 	}
 
 	isInPlace(i) {
-		if (i === this.realIndex) {
+		if (i === this.randomIndex) {
 			return true;
 		} else {
 			return false;
 		}
+	}
+
+	isPlaying() {
+		return this.sound.isPlaying();
 	}
 }

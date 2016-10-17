@@ -71,21 +71,22 @@ const sketch = (p5) => {
 		shapes = new Shapes(layout.orientation, layout.puzzleSize*.84, shapeCount, 4 , fps, frontColor);
 
 		// init button
-		button = new Button(layout, p5.width/2, p5.height/2, 1.5, fps, backColor, frontColor);
+		button = new Button(layout, p5.width/2, p5.height/2, 1.8, fps, backColor, frontColor);
 	}
 
 	p5.draw = () => {
 		p5.background(p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 255));
 
-		if (!started || solved) {
+		if (!started || solved || transition) {
 			shapes.display(started);
 			shapes.update();
-			if (shapes.getSize() === shapeCount && !started) {
-				button.display(started, solved, shapeCount, shapes.getSize());
+			if (shapes.getSize() === shapeCount && !started || transition) {
+				button.display(started, transition, shapeCount, shapes.getSize());
 				button.update();
+				transition = button.isDead();
 			}
-		} else {
-			puzzle.display();
+		} else if (started && !transition && !solved) {
+			puzzle.display(started, transition);
 		}
 	}
 
@@ -94,9 +95,14 @@ const sketch = (p5) => {
 		if (!started) {
 			let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, button.x, button.y);
 			if (!started && distance < button.radius()) {
-				started = button.bang(started);
-				// init puzzle
+				// 1. init puzzle
 				puzzle = new Puzzle(layout, bpm, fps, backColor, frontColor, sounds, images);
+				// 2. play 8th piece
+				puzzle.playIntro();
+				// 3. Change started to true
+				let delay = puzzle.clock.measure;
+				started = button.bang();
+				transition = button.bang();
 			} 
 		} else {
 			let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, puzzle.getX(), puzzle.getY());
