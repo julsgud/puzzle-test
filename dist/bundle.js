@@ -43164,7 +43164,203 @@
 
 
 /***/ },
+<<<<<<< HEAD
 /* 4 */,
+=======
+/* 4 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	var _Piece = __webpack_require__(5);
+
+	var _Piece2 = _interopRequireDefault(_Piece);
+
+	var _GhostPiece = __webpack_require__(6);
+
+	var _GhostPiece2 = _interopRequireDefault(_GhostPiece);
+
+	var _Helpers = __webpack_require__(7);
+
+	var _Helpers2 = _interopRequireDefault(_Helpers);
+
+	var _Clock = __webpack_require__(8);
+
+	var _Clock2 = _interopRequireDefault(_Clock);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Puzzle = function () {
+		function Puzzle(layout, bpm, fps, backColor, frontColor, sounds, images) {
+			_classCallCheck(this, Puzzle);
+
+			this.x = layout.x;
+			this.y = layout.y;
+			this.size = layout.puzzleSize;
+			this.color = backColor;
+
+			this.pieceLocations = layout.pieceLocations;
+			this.pieces = this.createPieces(this.pieceLocations, layout.pieceSize, backColor, frontColor, sounds, images);
+			this.moving = false;
+
+			// sequencer
+			this.clock = new _Clock2.default(bpm, fps);
+		}
+
+		_createClass(Puzzle, [{
+			key: 'display',
+			value: function display() {
+				this.clock.run(this.pieces, _GhostPiece2.default);
+				this.displayBoard();
+				this.pieces.forEach(function (p) {
+					return p.update();
+				});
+				this.pieces.forEach(function (p) {
+					return p.display();
+				});
+			}
+		}, {
+			key: 'displayBoard',
+			value: function displayBoard() {
+				p5.fill(255);
+				p5.noStroke();
+				p5.rect(this.x, this.y, this.size, this.size);
+			}
+		}, {
+			key: 'createPieces',
+			value: function createPieces(pieceLocations, pieceSize, backColor, frontColor, sounds, images) {
+				var pieces = new Array(pieceLocations.length);
+				var randomIndices = _Helpers2.default.generateRandomIndices(pieceLocations.length);
+				var polarity = _Helpers2.default.countInversions(randomIndices);
+
+				// make sure puzzle is solvable, see Helpers.js for more info
+				while (!_Helpers2.default.isEven(polarity)) {
+					randomIndices = _Helpers2.default.generateRandomIndices(pieceLocations.length);
+					polarity = _Helpers2.default.countInversions(randomIndices);
+					// console.log(polarity);
+					// console.log(Helpers.isEven(polarity));
+				}
+
+				for (var i = 0; i < pieceLocations.length; i++) {
+					if (randomIndices[i] === 8) {
+						pieces[i] = new _GhostPiece2.default(i, pieces.length - 1, pieceSize, pieceLocations[i], backColor, frontColor, sounds, images);
+					} else {
+						pieces[i] = new _Piece2.default(i, randomIndices[i], pieceSize, pieceLocations[i], backColor, frontColor, sounds, images);
+					}
+				}
+
+				/*
+	   for (var i = 0; i < piecesLocations.length; i++) {
+	   	if (i < 8) {
+	   		pieces[i] = new Piece(i, randomIndi)
+	   	} else { 
+	   		}
+	   }
+	   		*/
+
+				/*
+	   Init puzzle without creating pieces
+	   On start flag:
+	   1. Create pieces in correct place
+	   2. Use (alternate!?) movePiece method to move each to its shuffled spot
+	   3. Start running clock 
+	   4. Allow interaction
+	   */
+
+				return pieces;
+			}
+		}, {
+			key: 'movePiece',
+			value: function movePiece(x, y) {
+				var solved = false;
+
+				// 1. get index of clicked piece
+				var indexOfClickedPiece = _Helpers2.default.getIndexOfClickedPiece(this.pieces, x, y);
+				// console.log(indexOfClickedPiece);
+
+				// 2. get index of ghost piece
+				var indexOfGhostPiece = _Helpers2.default.getIndexOfGhostPiece(this.pieces, _GhostPiece2.default);
+				// console.log(indexOfGhostPiece);
+
+				// 3. if piece is not ghost piece, check if it can move
+				var canMove = _Helpers2.default.canPieceMove(this.pieces, indexOfClickedPiece, indexOfGhostPiece);
+				// console.log(canMove);
+
+
+				if (canMove) {
+					// this.pieces.forEach(p => console.log(p));
+					// 4. move
+					this.pieces[indexOfClickedPiece].prepMovement(this.pieces[indexOfGhostPiece].getPosition());
+					this.pieces[indexOfGhostPiece].prepMovement(this.pieces[indexOfClickedPiece].getPosition());
+					// 5. swap in array
+					this.pieces = _Helpers2.default.swapPiecesInArray(this.pieces, indexOfClickedPiece, indexOfGhostPiece);
+					// this.pieces.forEach(p => console.log(p));
+				}
+
+				//6. Check if puzzle is solved
+				solved = this.isSolved();
+
+				if (solved) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}, {
+			key: 'getX',
+			value: function getX() {
+				return this.x + this.size / 2;
+			}
+		}, {
+			key: 'getY',
+			value: function getY() {
+				return this.y + this.size / 2;
+			}
+		}, {
+			key: 'getSize',
+			value: function getSize() {
+				return this.size / 2;
+			}
+		}, {
+			key: 'isSolved',
+			value: function isSolved() {
+				var i = 0,
+				    inCorrectSpot = 0,
+				    bool = false;
+
+				while (i < this.pieces.length) {
+					bool = this.pieces[i].isInPlace(i);
+					if (bool) inCorrectSpot++;
+					i++;
+				}
+
+				if (inCorrectSpot === this.pieces.length) {
+					bool = true;
+				} else {
+					bool = false;
+				}
+
+				console.log('solved: ' + bool + " inSpot: " + inCorrectSpot);
+
+				return bool;
+			}
+		}]);
+
+		return Puzzle;
+	}();
+
+	exports.default = Puzzle;
+
+/***/ },
+>>>>>>> working
 /* 5 */
 /***/ function(module, exports) {
 
