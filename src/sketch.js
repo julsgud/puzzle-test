@@ -36,6 +36,8 @@ const sketch = (p5) => {
 	// colors
 	let backColor, frontColor;
 
+
+	/*-------- preload --------*/
 	p5.preload = () => {
 		for (let i = 0; i < sounds.length; i++) {
 			sounds[i] = p5.loadSound('assets/f' + i.toString() + '.mp3');
@@ -48,6 +50,7 @@ const sketch = (p5) => {
 		tabacGlam = p5.loadFont('./assets/tabac_glam.ttf');
 	}
 
+	/*-------- setup --------*/
 	p5.setup = () => {
 		p5.createCanvas(p5.windowWidth, p5.windowHeight);
 		p5.smooth(8);
@@ -74,6 +77,7 @@ const sketch = (p5) => {
 		button = new Button(layout, p5.width/2, p5.height/2, 1.5, fps, backColor, frontColor);
 	}
 
+	/*-------- draw --------*/
 	p5.draw = () => {
 		p5.background(p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 255));
 
