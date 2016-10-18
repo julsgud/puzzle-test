@@ -171,12 +171,9 @@
 			} else {
 				var _distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, puzzle.getX(), puzzle.getY());
 				if (!solved && _distance < puzzle.getSize()) {
-					console.log(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 					solved = puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 				}
 			}
-
-			// puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 
 			return false;
 		};
@@ -43255,24 +43252,6 @@
 					}
 				}
 
-				/*
-	   for (var i = 0; i < piecesLocations.length; i++) {
-	   	if (i < 8) {
-	   		pieces[i] = new Piece(i, randomIndi)
-	   	} else { 
-	   		}
-	   }
-	   		*/
-
-				/*
-	   Init puzzle without creating pieces
-	   On start flag:
-	   1. Create pieces in correct place
-	   2. Use (alternate!?) movePiece method to move each to its shuffled spot
-	   3. Start running clock 
-	   4. Allow interaction
-	   */
-
 				return pieces;
 			}
 		}, {
@@ -43619,7 +43598,7 @@
 			that.orientation = 'portrait';
 
 			if (originalWidth > 612) {
-				that.frameX = Math.floor(widthDifference / 2);
+				that.frameX = Math.ceil(widthDifference / 2);
 			} else {
 				that.frameX = 0;
 			}
@@ -43648,7 +43627,7 @@
 			that.frameX = (w - h) / 2;
 
 			if (originalHeight > 612) {
-				that.frameY = Math.floor(heightDifference / 2);
+				that.frameY = Math.ceil(heightDifference / 2);
 			} else {
 				that.frameY = 0;
 			}
