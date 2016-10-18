@@ -106,6 +106,7 @@
 		var backColor = void 0,
 		    frontColor = void 0;
 
+		/*-------- preload --------*/
 		p5.preload = function () {
 			for (var i = 0; i < sounds.length; i++) {
 				sounds[i] = p5.loadSound('assets/f' + i.toString() + '.mp3');
@@ -118,6 +119,7 @@
 			tabacGlam = p5.loadFont('./assets/tabac_glam.ttf');
 		};
 
+		/*-------- setup --------*/
 		p5.setup = function () {
 			p5.createCanvas(p5.windowWidth, p5.windowHeight);
 			p5.smooth(8);
@@ -144,6 +146,7 @@
 			button = new _Button2.default(layout, p5.width / 2, p5.height / 2, 1.5, fps, backColor, frontColor);
 		};
 
+		/*-------- draw --------*/
 		p5.draw = function () {
 			p5.background(p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 255));
 

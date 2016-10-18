@@ -73,6 +73,10 @@ export default class Piece {
 	play() {
 		this.sound.play();
 	}
+	
+	mute() {
+		this.sound.stop();
+	}
 
 	prepMovement(destination) {
 		// 1. update helper vectors

@@ -19,11 +19,13 @@ export default class Puzzle {
 		this.clock = new Clock(bpm, fps);
 	}
 
-	display() {
-		this.clock.run(this.pieces, GhostPiece);
-		this.displayBoard();
-		this.pieces.forEach(p => p.update());
-		this.pieces.forEach(p => p.display());
+	display(started, transition, solved) {
+		if (started && !transition) {
+			this.clock.run(this.pieces, GhostPiece, solved);
+			this.displayBoard();
+			this.pieces.forEach(p => p.update());
+			this.pieces.forEach(p => p.display());
+		}
 	}
 
 	displayBoard() {
@@ -118,9 +120,11 @@ export default class Puzzle {
 		} else {
 			bool = false;
 		}
-
-		console.log('solved: ' + bool + " inSpot: " + inCorrectSpot);
-
+		// console.log('solved: ' + bool + " inSpot: " + inCorrectSpot);
 		return bool;
+	}
+
+	playIntro() {
+		this.clock.play(this.pieces[this.pieces.length-2]);
 	}
 }

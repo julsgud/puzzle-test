@@ -52,6 +52,21 @@ const Helpers = {
 		that.pieceSize = Math.floor(that.puzzleSize/Math.sqrt(spaces));
 		that.pieceLocations = this.getPieceLocations(spaces, that.frameX, that.frameY, that.puzzleSize);
 
+		// cards
+		that.cardSize = h/3;
+
+		that.card1position = {};
+		that.card1position.x = p5.width*.25;
+		that.card1position.y = p5.height*.5;
+
+		that.card2position = {};
+		that.card2position.x = p5.width*.5;
+		that.card2position.y = p5.height*.5;
+
+		that.card3position = {};
+		that.card3position.x = p5.width*.75;
+		that.card3position.y = p5.height*.5;
+
 		return that;
 	},
 

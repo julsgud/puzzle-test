@@ -6,6 +6,7 @@ import Piece from './components/Piece';
 import Helpers from './components/Helpers';
 import Shapes from './components/Shapes';
 import Button from './components/Button';
+import Card from './components/Card';
 
 const sketch = (p5) => {
 	// make library globally available
@@ -17,7 +18,11 @@ const sketch = (p5) => {
 
 	// assets
 	let sounds = new Array(8);
+	let introSound;
+	let fullLoop;
+	let cheers;
 	let images = new Array(8);
+	let cardImages = new Array(3);
 	let tabacGlam; 
 
 	// state
@@ -32,6 +37,7 @@ const sketch = (p5) => {
 	let button;
 	let puzzle;
 	let spaces = 9;
+	let cards = new Array(3);
 
 	// colors
 	let backColor, frontColor;
@@ -43,8 +49,16 @@ const sketch = (p5) => {
 			sounds[i] = p5.loadSound('assets/f' + i.toString() + '.mp3');
 		}
 
+		introSound = p5.loadSound('assets/intro.mp3');
+		fullLoop = p5.loadSound('assets/loop.mp3');
+		cheers = p5.loadSound('assets/cheer.mp3');
+
 		for (let i = 0; i < images.length; i++) {
 			images[i] = p5.loadImage('assets/pz' + i.toString() + '.png');
+		}
+
+		for (let i = 0; i < cardImages.length; i++) {
+			cardImages[i] = p5.loadImage('assets/ci' + i.toString() + '.png');
 		}
 
 		tabacGlam = p5.loadFont('./assets/tabac_glam.ttf');
@@ -75,37 +89,56 @@ const sketch = (p5) => {
 
 		// init button
 		button = new Button(layout, p5.width/2, p5.height/2, 1.5, fps, backColor, frontColor);
+
+		// init card
+		
+		cards[0]= new Card("hola", layout.cardSize, layout.card1position, 1.5, fps, frontColor);
+		cards[1] = new Card("hola", layout.cardSize, layout.card2position, 1.5, fps, frontColor);
+		cards[2] = new Card("hola", layout.cardSize, layout.card3position, 1.5, fps, frontColor);
 	}
 
 	/*-------- draw --------*/
 	p5.draw = () => {
 		p5.background(p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 255));
 
-		if (!started || solved) {
+		if (!started || solved || transition) {
 			shapes.display(started);
 			shapes.update();
-			if (shapes.getSize() === shapeCount && !started) {
-				button.display(started, solved, shapeCount, shapes.getSize());
+			if (shapes.getSize() === shapeCount && !started || transition) {
+				button.display(started, transition, shapeCount, shapes.getSize());
 				button.update();
+				transition = button.isDead();
 			}
-		} else {
-			puzzle.display();
+		} else if (started && !transition && !solved) {
+			puzzle.display(started, transition);
 		}
+
+		cards.forEach(c => c.display());
 	}
 
+	/*-------- touch --------*/
 	p5.touchStarted = () => {
 
 		if (!started) {
 			let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, button.x, button.y);
 			if (!started && distance < button.radius()) {
-				started = button.bang(started);
-				// init puzzle
-				puzzle = new Puzzle(layout, bpm, fps, backColor, frontColor, sounds, images);
+				// 1. init puzzle
+				puzzle = new Puzzle(layout, bpm, fps, backColor, frontColor, sounds, images, fullLoop);
+				// 2. play 8th piece
+				introSound.play();
+				//3. change bools
+				started = true;
+				transition = true;
 			} 
 		} else {
 			let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, puzzle.getX(), puzzle.getY());
 			if (!solved && distance < puzzle.getSize()) {
 				solved = puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+
+				if (solved) {
+					fullLoop.loop();
+					cheers.play();
+				}
 			}
 		}
 
@@ -113,7 +146,6 @@ const sketch = (p5) => {
 	}
 
 	p5.keyTyped = () => {
-		console.log('ey');
   
 	  if (p5.key == 's' || p5.key == 'S') {
 	    p5.saveCanvas('myCanvas_.png');

@@ -7,45 +7,31 @@ export default class Clock {
 		this.lastTime = 0;
 	}
 
-	run(pieces, GhostPiece) {
-
+	run(pieces, GhostPiece, solved) {
 		/* on run, play next piece if a full measure
 		has elapsed since last event*/
-		if (p5.millis() - this.lastTime >= this.measure) {
 
-			/* if ghostpiece is next, skip*/
-			if (pieces[this.currentPiece] instanceof GhostPiece) {
+		if (!solved) {
+			if (p5.millis() - this.lastTime >= this.measure) {
+
+				/* if ghostpiece is next, skip*/
+				if (pieces[this.currentPiece] instanceof GhostPiece) {
+					this.currentPiece++;
+					// wrap piece index when ghost piece is in last spot
+					if(this.currentPiece > pieces.length-1) this.currentPiece %= pieces.length;
+				} else {
+					
+					
+				}
+				pieces[this.currentPiece].play();
 				this.currentPiece++;
-				// wrap piece index when ghost piece is in last spot
-				if(this.currentPiece > pieces.length-1) this.currentPiece %= pieces.length;
-			} else {
-				
-				
+				this.currentPiece %= pieces.length;
+				this.lastTime = p5.millis();
 			}
-			pieces[this.currentPiece].play();
-			this.currentPiece++;
-			this.currentPiece %= pieces.length;
-			this.lastTime = p5.millis();
-		} 
-
-
-		// if (this.ms < this.margin && ) {
-		// 	// console.log('bang' + ' ' + this.currentPiece + ' ' + this.ms);
-		// 	if (pieces[this.currentPiece] instanceof GhostPiece) {
-		// 		this.currentPiece++;
-		// 		pieces[this.currentPiece].play();
-		// 		this.currentPiece++;
-		// 	} else {
-		// 		pieces[this.currentPiece].play(); 
-		// 		this.currentPiece++;
-		// 	}
-		// 	this.currentPiece %= pieces.length;
-		// } else if (this.ms < this.margin*1.3) {
-		// 	console.log(this.ms);
-		// }
-	}
-
-	stop() {
-
+		} else {
+			for (let i = 0; i < pieces.length-1; i++) {
+				pieces[i].mute();
+			}
+		}
 	}
 }

@@ -4,9 +4,9 @@ export default class Button {
 		this.y = y;
 		this.buttonSize = 0;
 		if (layout.orientation == 'portrait') {
-			this.buttonSize = layout.puzzleSize/8;
+			this.buttonSize = layout.puzzleSize/6;
 		} else {
-			this.buttonSize = layout.puzzleSize/8;
+			this.buttonSize = layout.puzzleSize/6;
 		}
 		this.size = 0;
 		this.anchorSize = this.buttonSize;
@@ -27,16 +27,15 @@ export default class Button {
 
 	}
 
-	display(started, solved, shapeCount, totalShapes) {
-		if (!started && shapeCount == totalShapes) {
+	display(started, transition, shapeCount, totalShapes) {
+		if (!started && shapeCount == totalShapes || !transition) {
 			this.fadeIn();
 			this.grow();
-		} else {
+		} else if (transition) {
 			this.fadeOut();
 			this.shrink();
 		}
-		p5.fill(p5.red(this.c1), p5.green(this.c1), p5.blue(this.c1), this.alpha);
-		// p5.ellipse(this.x, this.y, this.size, this.size);
+		// play shape
 		p5.fill(255, 200);
 		p5.triangle(this.x-this.size/5, this.y-this.size/5, this.x+this.size/4, this.y, this.x-this.size/5, this.y+this.size/5);
 	}
@@ -56,7 +55,7 @@ export default class Button {
 	}
 
 	fadeOut() {
-		if (this.alpha > 0) this.alpha -= this.fadeFactor*2;
+		if (this.alpha > 0) this.alpha -= this.fadeFactor;
 	}
 
 	grow() {
@@ -65,14 +64,18 @@ export default class Button {
 	}
 
 	shrink() {
-		if (this.size > 0) this.size -= this.growthFactor*1.5;
+		if (this.size > 0) this.size -= this.growthFactor*1.3;
 	}
 
 	radius() {
 		return this.anchorSize;
 	}
 
-	bang(started) {
-		if (!started) return true;
+	isDead() {
+		if (this.size <= 0) {
+			return false;
+		} else {
+			return true;
+		}
 	}
 }
