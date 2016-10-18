@@ -74,6 +74,10 @@
 
 	var _Button2 = _interopRequireDefault(_Button);
 
+	var _Card = __webpack_require__(12);
+
+	var _Card2 = _interopRequireDefault(_Card);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var sketch = function sketch(p5) {
@@ -86,7 +90,11 @@
 
 		// assets
 		var sounds = new Array(8);
+		var introSound = void 0;
+		var fullLoop = void 0;
+		var cheers = void 0;
 		var images = new Array(8);
+		var cardImages = new Array(3);
 		var tabacGlam = void 0;
 
 		// state
@@ -101,6 +109,7 @@
 		var button = void 0;
 		var puzzle = void 0;
 		var spaces = 9;
+		var cards = new Array(3);
 
 		// colors
 		var backColor = void 0,
@@ -112,8 +121,16 @@
 				sounds[i] = p5.loadSound('assets/f' + i.toString() + '.mp3');
 			}
 
+			introSound = p5.loadSound('assets/intro.mp3');
+			fullLoop = p5.loadSound('assets/loop.mp3');
+			cheers = p5.loadSound('assets/cheer.mp3');
+
 			for (var _i = 0; _i < images.length; _i++) {
 				images[_i] = p5.loadImage('assets/pz' + _i.toString() + '.png');
+			}
+
+			for (var _i2 = 0; _i2 < cardImages.length; _i2++) {
+				cardImages[_i2] = p5.loadImage('assets/c' + _i2.toString() + '.png');
 			}
 
 			tabacGlam = p5.loadFont('./assets/tabac_glam.ttf');
@@ -150,31 +167,57 @@
 		p5.draw = function () {
 			p5.background(p5.color(p5.red(backColor), p5.green(backColor), p5.blue(backColor), 255));
 
-			if (!started || solved) {
+			if (!started || solved || transition) {
 				shapes.display(started);
 				shapes.update();
-				if (shapes.getSize() === shapeCount && !started) {
-					button.display(started, solved, shapeCount, shapes.getSize());
+				if (shapes.getSize() === shapeCount && !started || transition) {
+					button.display(started, transition, shapeCount, shapes.getSize());
 					button.update();
+					transition = button.isDead();
 				}
-			} else {
-				puzzle.display();
+			} else if (started && !transition && !solved) {
+				puzzle.display(started, transition);
 			}
+
+			if (solved) cards.forEach(function (c) {
+				return c.display();
+			});
 		};
 
+		/*-------- touch --------*/
 		p5.touchStarted = function () {
 
 			if (!started) {
 				var distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, button.x, button.y);
 				if (!started && distance < button.radius()) {
-					started = button.bang(started);
-					// init puzzle
-					puzzle = new _Puzzle2.default(layout, bpm, fps, backColor, frontColor, sounds, images);
+					// 1. init puzzle
+					puzzle = new _Puzzle2.default(layout, bpm, fps, backColor, frontColor, sounds, images, fullLoop);
+					// 2. play 8th piece
+					introSound.play();
+					//3. change bools
+					started = true;
+					transition = true;
 				}
 			} else {
 				var _distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, puzzle.getX(), puzzle.getY());
 				if (!solved && _distance < puzzle.getSize()) {
 					solved = puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
+
+					if (solved) {
+						fullLoop.loop();
+						cheers.play();
+						// init cards
+						cards[0] = new _Card2.default(layout.cardSize, layout.card1position, 1.5, fps, frontColor, cardImages[0], "https://youtu.be/9_B_7-IuGG8");
+						cards[1] = new _Card2.default(layout.cardSize, layout.card2position, 1.5, fps, frontColor, cardImages[1], "https://youtu.be/9_B_7-IuGG8");
+						cards[2] = new _Card2.default(layout.cardSize, layout.card3position, 1.5, fps, frontColor, cardImages[2], "https://youtu.be/9_B_7-IuGG8");
+					}
+				}
+			}
+
+			if (solved) {
+				for (var i = 0; i < cards.length; i++) {
+					var _distance2 = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, cards[i].getX(), cards[i].getY());
+					if (_distance2 < cards[i].getSize()) cards[i].bang();
 				}
 			}
 
@@ -182,7 +225,6 @@
 		};
 
 		p5.keyTyped = function () {
-			console.log('ey');
 
 			if (p5.key == 's' || p5.key == 'S') {
 				p5.saveCanvas('myCanvas_.png');
@@ -43215,15 +43257,17 @@
 
 		_createClass(Puzzle, [{
 			key: 'display',
-			value: function display() {
-				this.clock.run(this.pieces, _GhostPiece2.default);
-				this.displayBoard();
-				this.pieces.forEach(function (p) {
-					return p.update();
-				});
-				this.pieces.forEach(function (p) {
-					return p.display();
-				});
+			value: function display(started, transition, solved) {
+				if (started && !transition) {
+					this.clock.run(this.pieces, _GhostPiece2.default, solved);
+					this.displayBoard();
+					this.pieces.forEach(function (p) {
+						return p.update();
+					});
+					this.pieces.forEach(function (p) {
+						return p.display();
+					});
+				}
 			}
 		}, {
 			key: 'displayBoard',
@@ -43289,6 +43333,7 @@
 				solved = this.isSolved();
 
 				if (solved) {
+					this.clock.stopAll(this.pieces);
 					return true;
 				} else {
 					return false;
@@ -43327,10 +43372,13 @@
 				} else {
 					bool = false;
 				}
-
-				console.log('solved: ' + bool + " inSpot: " + inCorrectSpot);
-
+				// console.log('solved: ' + bool + " inSpot: " + inCorrectSpot);
 				return bool;
+			}
+		}, {
+			key: 'playIntro',
+			value: function playIntro() {
+				this.clock.play(this.pieces[this.pieces.length - 2]);
 			}
 		}]);
 
@@ -43433,6 +43481,11 @@
 			key: 'play',
 			value: function play() {
 				this.sound.play();
+			}
+		}, {
+			key: 'mute',
+			value: function mute() {
+				this.sound.stop();
 			}
 		}, {
 			key: 'prepMovement',
@@ -43641,6 +43694,21 @@
 			that.pieceSize = Math.floor(that.puzzleSize / Math.sqrt(spaces));
 			that.pieceLocations = this.getPieceLocations(spaces, that.frameX, that.frameY, that.puzzleSize);
 
+			// cards
+			that.cardSize = h / 3;
+
+			that.card1position = {};
+			that.card1position.x = p5.width * .20;
+			that.card1position.y = p5.height * .5;
+
+			that.card2position = {};
+			that.card2position.x = p5.width * .5;
+			that.card2position.y = p5.height * .5;
+
+			that.card3position = {};
+			that.card3position.x = p5.width * .80;
+			that.card3position.y = p5.height * .5;
+
 			return that;
 		},
 
@@ -43803,42 +43871,33 @@
 
 		_createClass(Clock, [{
 			key: "run",
-			value: function run(pieces, GhostPiece) {
-
+			value: function run(pieces, GhostPiece, solved) {
 				/* on run, play next piece if a full measure
 	   has elapsed since last event*/
-				if (p5.millis() - this.lastTime >= this.measure) {
 
-					/* if ghostpiece is next, skip*/
-					if (pieces[this.currentPiece] instanceof GhostPiece) {
+				if (!solved) {
+					if (p5.millis() - this.lastTime >= this.measure) {
+
+						/* if ghostpiece is next, skip*/
+						if (pieces[this.currentPiece] instanceof GhostPiece) {
+							this.currentPiece++;
+							// wrap piece index when ghost piece is in last spot
+							if (this.currentPiece > pieces.length - 1) this.currentPiece %= pieces.length;
+						} else {}
+						pieces[this.currentPiece].play();
 						this.currentPiece++;
-						// wrap piece index when ghost piece is in last spot
-						if (this.currentPiece > pieces.length - 1) this.currentPiece %= pieces.length;
-					} else {}
-					pieces[this.currentPiece].play();
-					this.currentPiece++;
-					this.currentPiece %= pieces.length;
-					this.lastTime = p5.millis();
+						this.currentPiece %= pieces.length;
+						this.lastTime = p5.millis();
+					}
 				}
-
-				// if (this.ms < this.margin && ) {
-				// 	// console.log('bang' + ' ' + this.currentPiece + ' ' + this.ms);
-				// 	if (pieces[this.currentPiece] instanceof GhostPiece) {
-				// 		this.currentPiece++;
-				// 		pieces[this.currentPiece].play();
-				// 		this.currentPiece++;
-				// 	} else {
-				// 		pieces[this.currentPiece].play(); 
-				// 		this.currentPiece++;
-				// 	}
-				// 	this.currentPiece %= pieces.length;
-				// } else if (this.ms < this.margin*1.3) {
-				// 	console.log(this.ms);
-				// }
 			}
 		}, {
-			key: "stop",
-			value: function stop() {}
+			key: "stopAll",
+			value: function stopAll(pieces) {
+				for (var i = 0; i < pieces.length - 1; i++) {
+					pieces[i].mute();
+				}
+			}
 		}]);
 
 		return Clock;
@@ -44058,9 +44117,9 @@
 			this.y = y;
 			this.buttonSize = 0;
 			if (layout.orientation == 'portrait') {
-				this.buttonSize = layout.puzzleSize / 8;
+				this.buttonSize = layout.puzzleSize / 6;
 			} else {
-				this.buttonSize = layout.puzzleSize / 8;
+				this.buttonSize = layout.puzzleSize / 6;
 			}
 			this.size = 0;
 			this.anchorSize = this.buttonSize;
@@ -44082,16 +44141,15 @@
 
 		_createClass(Button, [{
 			key: 'display',
-			value: function display(started, solved, shapeCount, totalShapes) {
-				if (!started && shapeCount == totalShapes) {
+			value: function display(started, transition, shapeCount, totalShapes) {
+				if (!started && shapeCount == totalShapes || !transition) {
 					this.fadeIn();
 					this.grow();
-				} else {
+				} else if (transition) {
 					this.fadeOut();
 					this.shrink();
 				}
-				p5.fill(p5.red(this.c1), p5.green(this.c1), p5.blue(this.c1), this.alpha);
-				// p5.ellipse(this.x, this.y, this.size, this.size);
+				// play shape
 				p5.fill(255, 200);
 				p5.triangle(this.x - this.size / 5, this.y - this.size / 5, this.x + this.size / 4, this.y, this.x - this.size / 5, this.y + this.size / 5);
 			}
@@ -44114,7 +44172,7 @@
 		}, {
 			key: 'fadeOut',
 			value: function fadeOut() {
-				if (this.alpha > 0) this.alpha -= this.fadeFactor * 2;
+				if (this.alpha > 0) this.alpha -= this.fadeFactor;
 			}
 		}, {
 			key: 'grow',
@@ -44125,7 +44183,7 @@
 		}, {
 			key: 'shrink',
 			value: function shrink() {
-				if (this.size > 0) this.size -= this.growthFactor * 1.5;
+				if (this.size > 0) this.size -= this.growthFactor * 1.3;
 			}
 		}, {
 			key: 'radius',
@@ -44133,9 +44191,13 @@
 				return this.anchorSize;
 			}
 		}, {
-			key: 'bang',
-			value: function bang(started) {
-				if (!started) return true;
+			key: 'isDead',
+			value: function isDead() {
+				if (this.size <= 0) {
+					return false;
+				} else {
+					return true;
+				}
 			}
 		}]);
 
@@ -44143,6 +44205,127 @@
 	}();
 
 	exports.default = Button;
+
+/***/ },
+/* 12 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Card = function () {
+		function Card(size, endPosition, duration, fps, frontColor, image, link) {
+			_classCallCheck(this, Card);
+
+			this.size = size;
+			this.size2 = size;
+			this.alpha = 0;
+			this.link = link;
+
+			this.image = image;
+
+			// animation
+			this.framesToMax = duration * fps;
+			this.fadeFactor = 200 / this.framesToMax;
+			this.angle = 0.0;
+
+			// movement
+			this.position = p5.createVector(p5.width / 2, p5.height / 2);
+			this.destination = p5.createVector(endPosition.x, endPosition.y);
+			this.velocity = p5.createVector(0, 0);
+			this.acceleration = p5.createVector(0, 0);
+			this.speedLimit = p5.width / 600;
+
+			// prep movement
+			this.target = this.destination.copy();
+			this.dest = this.destination.copy();
+			this.dest.sub(this.position);
+
+			var direction = this.dest.copy();
+			direction.normalize();
+			this.acceleration = direction.copy();
+
+			this.moving = true;
+		}
+
+		_createClass(Card, [{
+			key: "display",
+			value: function display() {
+				this.update();
+				p5.imageMode(p5.CENTER);
+				p5.rectMode(p5.CENTER);
+				p5.image(this.image, this.position.x, this.position.y, this.size, this.size);
+				p5.fill(255, this.alpha);
+				p5.rect(this.position.x, this.position.y, this.size, this.size);
+			}
+		}, {
+			key: "update",
+			value: function update() {
+				if (this.moving) {
+					if (this.position.dist(this.target) > this.speedLimit) {
+						/* Accel away!*/
+						// 1. accel
+						this.velocity.add(this.acceleration);
+
+						// 2. cap speed
+						this.velocity.limit(this.speedLimit);
+
+						// 3. move
+						this.position.add(this.velocity);
+					} else {
+						/* when distance is less than speed limit, use it to
+	     cap velocity and stop at dist===0 */
+						this.velocity.limit(this.position.dist(this.target));
+						this.position.add(this.velocity);
+					}
+
+					if (this.position.dist(this.target) === 0) {
+						this.acceleration.mult(0);
+						this.velocity.mult(0);
+						this.moving = false;
+					}
+				}
+				if (this.alpha < 75) this.fadeIn();
+			}
+		}, {
+			key: "fadeIn",
+			value: function fadeIn() {
+				this.alpha += this.fadeFactor / 5;
+				console.log(this.alpha);
+			}
+		}, {
+			key: "getX",
+			value: function getX() {
+				return this.position.x;
+			}
+		}, {
+			key: "getY",
+			value: function getY() {
+				return this.position.y;
+			}
+		}, {
+			key: "getSize",
+			value: function getSize() {
+				return this.size / 2;
+			}
+		}, {
+			key: "bang",
+			value: function bang() {
+				window.open(this.link);
+			}
+		}]);
+
+		return Card;
+	}();
+
+	exports.default = Card;
 
 /***/ }
 /******/ ]);
