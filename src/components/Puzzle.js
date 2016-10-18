@@ -88,6 +88,7 @@ export default class Puzzle {
 		solved = this.isSolved();
 
 		if (solved) {
+			this.clock.stopAll(this.pieces);
 			return true;
 		} else {
 			return false;

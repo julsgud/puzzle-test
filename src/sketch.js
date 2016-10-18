@@ -58,7 +58,7 @@ const sketch = (p5) => {
 		}
 
 		for (let i = 0; i < cardImages.length; i++) {
-			cardImages[i] = p5.loadImage('assets/ci' + i.toString() + '.png');
+			cardImages[i] = p5.loadImage('assets/c' + i.toString() + '.png');
 		}
 
 		tabacGlam = p5.loadFont('./assets/tabac_glam.ttf');
@@ -89,12 +89,6 @@ const sketch = (p5) => {
 
 		// init button
 		button = new Button(layout, p5.width/2, p5.height/2, 1.5, fps, backColor, frontColor);
-
-		// init card
-		
-		cards[0]= new Card("hola", layout.cardSize, layout.card1position, 1.5, fps, frontColor);
-		cards[1] = new Card("hola", layout.cardSize, layout.card2position, 1.5, fps, frontColor);
-		cards[2] = new Card("hola", layout.cardSize, layout.card3position, 1.5, fps, frontColor);
 	}
 
 	/*-------- draw --------*/
@@ -113,7 +107,7 @@ const sketch = (p5) => {
 			puzzle.display(started, transition);
 		}
 
-		cards.forEach(c => c.display());
+		if (solved) cards.forEach(c => c.display());
 	}
 
 	/*-------- touch --------*/
@@ -138,7 +132,18 @@ const sketch = (p5) => {
 				if (solved) {
 					fullLoop.loop();
 					cheers.play();
+					// init cards
+					cards[0]= new Card(layout.cardSize, layout.card1position, 1.5, fps, frontColor, cardImages[0], "https://youtu.be/9_B_7-IuGG8");
+					cards[1] = new Card(layout.cardSize, layout.card2position, 1.5, fps, frontColor, cardImages[1], "https://youtu.be/9_B_7-IuGG8");
+					cards[2] = new Card(layout.cardSize, layout.card3position, 1.5, fps, frontColor, cardImages[2], "https://youtu.be/9_B_7-IuGG8");
 				}
+			}
+		}
+
+		if (solved) {
+			for (let i = 0; i < cards.length; i++) {
+				let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, cards[i].getX(), cards[i].getY());
+				if (distance < cards[i].getSize()) cards[i].bang();
 			}
 		}
 

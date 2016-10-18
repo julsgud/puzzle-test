@@ -28,10 +28,12 @@ export default class Clock {
 				this.currentPiece %= pieces.length;
 				this.lastTime = p5.millis();
 			}
-		} else {
-			for (let i = 0; i < pieces.length-1; i++) {
-				pieces[i].mute();
-			}
+		}
+	}
+
+	stopAll(pieces) {
+		for (let i = 0; i < pieces.length-1; i++) {
+			pieces[i].mute();
 		}
 	}
 }

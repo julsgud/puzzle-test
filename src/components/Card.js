@@ -1,11 +1,16 @@
 export default class Card {
-	constructor(text, size, endPosition, duration, fps, frontColor) {
+	constructor(size, endPosition, duration, fps, frontColor, image, link) {
 		this.size = size;
+		this.size2 = size;
 		this.alpha = 0;
+		this.link = link;
+
+		this.image = image;
 
 		// animation
 		this.framesToMax = duration * fps;
 		this.fadeFactor = 200/this.framesToMax;
+		this.angle = 0.0;
 
 		// movement
 		this.position = p5.createVector(p5.width/2, p5.height/2);
@@ -28,9 +33,12 @@ export default class Card {
 
 	display() {
 		this.update();
-		p5.fill(255, this.alpha);
+		p5.imageMode(p5.CENTER);
 		p5.rectMode(p5.CENTER);
+		p5.image(this.image, this.position.x, this.position.y, this.size, this.size);
+		p5.fill(255, this.alpha);
 		p5.rect(this.position.x, this.position.y, this.size, this.size);
+		
 	}
 
 	update() {
@@ -58,10 +66,27 @@ export default class Card {
 				this.moving = false;
 			}
 		}
-		if(this.alpha < 200) this.fadeIn();
+		if (this.alpha < 75) this.fadeIn();
 	}
 
 	fadeIn() {
-		this.alpha += this.fadeFactor/2;
+		this.alpha += this.fadeFactor/5;
+		console.log(this.alpha);
+	}
+
+	getX() {
+		return this.position.x;
+	}
+
+	getY() {
+		return this.position.y;
+	}
+
+	getSize() {
+		return this.size/2;
+	}
+
+	bang() {
+		window.open(this.link);
 	}
 }
