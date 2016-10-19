@@ -17,7 +17,7 @@ export default class Card {
 		this.destination = p5.createVector(endPosition.x, endPosition.y);
 		this.velocity = p5.createVector(0, 0);
 		this.acceleration = p5.createVector(0, 0);
-		this.speedLimit = p5.width/600;
+		this.speedLimit = p5.width/400;
 
 		// prep movement
 		this.target = this.destination.copy();

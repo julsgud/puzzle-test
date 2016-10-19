@@ -92,7 +92,6 @@
 		var sounds = new Array(8);
 		var introSound = void 0;
 		var fullLoop = void 0;
-		var cheers = void 0;
 		var images = new Array(8);
 		var cardImages = new Array(3);
 		var tabacGlam = void 0;
@@ -101,6 +100,7 @@
 		var started = false;
 		var solved = false;
 		var transition = false;
+		var endTransition = false;
 
 		// components
 		var layout = void 0;
@@ -123,7 +123,6 @@
 
 			introSound = p5.loadSound('assets/intro.mp3');
 			fullLoop = p5.loadSound('assets/loop.mp3');
-			cheers = p5.loadSound('assets/cheer.mp3');
 
 			for (var _i = 0; _i < images.length; _i++) {
 				images[_i] = p5.loadImage('assets/pz' + _i.toString() + '.png');
@@ -182,6 +181,10 @@
 			if (solved) cards.forEach(function (c) {
 				return c.display();
 			});
+			if (solved && endTransition && !introSound.isPlaying()) {
+				fullLoop.loop();
+				endTransition = false;
+			}
 		};
 
 		/*-------- touch --------*/
@@ -204,8 +207,8 @@
 					solved = puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 
 					if (solved) {
-						fullLoop.loop();
-						cheers.play();
+						introSound.play();
+						endTransition = true;
 						// init cards
 						cards[0] = new _Card2.default(layout.cardSize, layout.card1position, 1.5, fps, frontColor, cardImages[0], "https://youtu.be/9_B_7-IuGG8");
 						cards[1] = new _Card2.default(layout.cardSize, layout.card2position, 1.5, fps, frontColor, cardImages[1], "https://youtu.be/9_B_7-IuGG8");
@@ -217,7 +220,11 @@
 			if (solved) {
 				for (var i = 0; i < cards.length; i++) {
 					var _distance2 = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, cards[i].getX(), cards[i].getY());
-					if (_distance2 < cards[i].getSize()) cards[i].bang();
+					if (_distance2 < cards[i].getSize()) {
+						fullLoop.stop();
+						introSound.play();
+						cards[i].bang();
+					}
 				}
 			}
 
@@ -43666,6 +43673,21 @@
 			that.pieceSize = that.puzzleSize / Math.sqrt(spaces);
 			that.pieceLocations = this.getPieceLocations(spaces, that.frameX, that.frameY, that.puzzleSize);
 
+			// cards
+			that.cardSize = w / 3;
+
+			that.card1position = {};
+			that.card1position.x = p5.width * .5;
+			that.card1position.y = p5.height * .20;
+
+			that.card2position = {};
+			that.card2position.x = p5.width * .5;
+			that.card2position.y = p5.height * .5;
+
+			that.card3position = {};
+			that.card3position.x = p5.width * .5;
+			that.card3position.y = p5.height * .80;
+
 			return that;
 		},
 
@@ -44241,7 +44263,7 @@
 			this.destination = p5.createVector(endPosition.x, endPosition.y);
 			this.velocity = p5.createVector(0, 0);
 			this.acceleration = p5.createVector(0, 0);
-			this.speedLimit = p5.width / 600;
+			this.speedLimit = p5.width / 400;
 
 			// prep movement
 			this.target = this.destination.copy();

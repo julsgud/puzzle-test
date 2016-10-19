@@ -20,7 +20,6 @@ const sketch = (p5) => {
 	let sounds = new Array(8);
 	let introSound;
 	let fullLoop;
-	let cheers;
 	let images = new Array(8);
 	let cardImages = new Array(3);
 	let tabacGlam; 
@@ -29,6 +28,7 @@ const sketch = (p5) => {
 	var started = false;
 	let solved = false;
 	let transition = false;
+	let endTransition = false;
 
 	// components
 	let layout;
@@ -51,7 +51,6 @@ const sketch = (p5) => {
 
 		introSound = p5.loadSound('assets/intro.mp3');
 		fullLoop = p5.loadSound('assets/loop.mp3');
-		cheers = p5.loadSound('assets/cheer.mp3');
 
 		for (let i = 0; i < images.length; i++) {
 			images[i] = p5.loadImage('assets/pz' + i.toString() + '.png');
@@ -108,6 +107,10 @@ const sketch = (p5) => {
 		}
 
 		if (solved) cards.forEach(c => c.display());
+		if (solved && endTransition && !introSound.isPlaying()) {
+			fullLoop.loop();
+			endTransition = false;
+		}
 	}
 
 	/*-------- touch --------*/
@@ -130,8 +133,8 @@ const sketch = (p5) => {
 				solved = puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 
 				if (solved) {
-					fullLoop.loop();
-					cheers.play();
+					introSound.play();
+					endTransition = true;
 					// init cards
 					cards[0]= new Card(layout.cardSize, layout.card1position, 1.5, fps, frontColor, cardImages[0], "https://youtu.be/9_B_7-IuGG8");
 					cards[1] = new Card(layout.cardSize, layout.card2position, 1.5, fps, frontColor, cardImages[1], "https://youtu.be/9_B_7-IuGG8");
@@ -143,7 +146,11 @@ const sketch = (p5) => {
 		if (solved) {
 			for (let i = 0; i < cards.length; i++) {
 				let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, cards[i].getX(), cards[i].getY());
-				if (distance < cards[i].getSize()) cards[i].bang();
+				if (distance < cards[i].getSize()) {
+					fullLoop.stop();
+					introSound.play();
+					cards[i].bang();
+				}
 			}
 		}
 
