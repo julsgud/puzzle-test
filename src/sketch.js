@@ -137,7 +137,7 @@ const sketch = (p5) => {
 					endTransition = true;
 					// init cards
 					cards[0]= new Card(layout.cardSize, layout.card1position, 1.5, fps, frontColor, cardImages[0], "https://youtu.be/586-LVjAQ4I");
-					cards[1] = new Card(layout.cardSize, layout.card2position, 1.5, fps, frontColor, cardImages[1], "https://youtu.be/9_B_7-IuGG8");
+					cards[1] = new Card(layout.cardSize, layout.card2position, 1.5, fps, frontColor, cardImages[1], "https://youtu.be/ZXNpKL6eYuM");
 					cards[2] = new Card(layout.cardSize, layout.card3position, 1.5, fps, frontColor, cardImages[2], "https://youtu.be/opA-7BP88pI");
 				}
 			}
@@ -157,15 +157,15 @@ const sketch = (p5) => {
 		return false;
 	}
 
-	p5.keyTyped = () => {
+	// p5.keyTyped = () => {
   
-	  if (p5.key == 's' || p5.key == 'S') {
-	    p5.saveCanvas('myCanvas_.png');
-	  }
+	//   if (p5.key == 's' || p5.key == 'S') {
+	//     p5.saveCanvas('myCanvas_.png');
+	//   }
   
-	  return false;
+	//   return false;
 	  
-	}	
+	// }	
 }
 
 new p5(sketch);
