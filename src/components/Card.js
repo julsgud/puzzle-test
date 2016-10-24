@@ -86,25 +86,26 @@ export default class Card {
 		return this.size/2;
 	}
 
-	bang(orientation) {
+	bang(orientation, size, playerId) {
 		// window.open(this.link);
-		return this.createVideo(orientation);
+		return this.createVideo(orientation, size, playerId);
 	}
 
-	createVideo(orientation) {
+	createVideo(orientation, size, playerId) {
 		let video = true;
 		console.log(orientation);
 
 		let player;
-		let w = (orientation === 'portrait') ? p5.width/1.5 : p5.width/3;
-		let h = (orientation === 'portrait') ? p5.height/3 : p5. height/3;
+		// let w = (orientation === 'portrait') ? p5.width/1.5 : p5.width/3;
+		// let h = (orientation === 'portrait') ? p5.height/3 : p5. height/3;
+		let w = size, h = size;
 
 		let wString = w.toString();
 		let hString = h.toString();
 
 		console.log(YT);
 
-		player = new YT.Player('player', {
+		player = new YT.Player('player' + playerId.toString(), {
 			height: hString,
 			width: wString,
 			videoId: this.videoId,

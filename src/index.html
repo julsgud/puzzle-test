@@ -8,37 +8,9 @@
     <meta property="og:url" content="https://project-6307555188817434923.firebaseapp.com/"/>
     <meta property="og:title" content="I Can Chase Dragons ~ Fauna"/>
     <meta property="og:image" content="http://imgur.com/a/7at3M"/>
-    
     <meta property="og:description" content="Ordena el caos, encuentra unas sorpresas y únete a la fiesta!"/>
     <title> iccd </title>
-    <style>
-      canvas {
-        position: absolute;
-        z-index: 0;
-      }
-      #video-container {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-box-align: center;
-        -webkit-align-items: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-align-content: center;
-        -ms-flex-line-pack: center;
-        align-content: center;
-        -webkit-justify-content: space-around;
-        -ms-flex-pack: space-around;
-        justify-content: space-around;
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        margin: 0 auto;
-        padding: 0;
-        z-index: 1;
-      }
-    </style>
+    <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body style="padding:0; margin:0; overflow: hidden;">
 <script>
@@ -59,21 +31,16 @@
    }(document, 'script', 'facebook-jssdk'));
 </script>
 <script>
-      // 2. This code loads the IFrame Player API code asynchronously.
+  // 2. This code loads the IFrame Player API code asynchronously.
   var tag = document.createElement('script');
   tag.src = "https://www.youtube.com/iframe_api";
   var firstScriptTag = document.getElementsByTagName('script')[0];
   firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-  // create player div
-  // var playerDiv = document.createElement('div');
-  // playerDiv.id = "player";
-  // var canvasTag = document.getElementByTagName('canvas')[0];
-  // canvasTag.parentNode.insertAfter(playerDiv, canvasTag);
 </script>
 <div id="video-container">
-  <div id="player"></div>
+  <div id="player0"></div>
+  <div id="player1"></div>
+  <div id="player2"></div>
 </div>
-
 </body>
 </html> 

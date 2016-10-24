@@ -78,6 +78,10 @@
 
 	var _Card2 = _interopRequireDefault(_Card);
 
+	var _Video = __webpack_require__(13);
+
+	var _Video2 = _interopRequireDefault(_Video);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	var sketch = function sketch(p5) {
@@ -101,6 +105,7 @@
 		var solved = false;
 		var transition = false;
 		var endTransition = false;
+		var displayingVideo = false;
 
 		// components
 		var layout = void 0;
@@ -109,6 +114,8 @@
 		var button = void 0;
 		var puzzle = void 0;
 		var spaces = 9;
+		var videos = new Array(3);
+		var videoIds = ["586-LVjAQ4I", "ZXNpKL6eYuM", "opA-7BP88pI"];
 		var cards = new Array(3);
 
 		// colors
@@ -151,8 +158,14 @@
 			// layout
 			if (p5.width <= p5.height) {
 				layout = _Helpers2.default.initPortrait(p5.width, p5.height, spaces);
+				var vc = document.getElementById('video-container');
+				vc.className += "portrait";
+				vc.className += " back";
 			} else {
 				layout = _Helpers2.default.initLandscape(p5.width, p5.height, spaces);
+				var _vc = document.getElementById('video-container');
+				_vc.className += "landscape";
+				_vc.className += " back";
 			}
 
 			// init shapes
@@ -160,6 +173,15 @@
 
 			// init button
 			button = new _Button2.default(layout, p5.width / 2, p5.height / 2, 1.5, fps, backColor, frontColor);
+
+			// videos
+			for (var i = 0; i < videos.length; i++) {
+				videos[i] = new _Video2.default(layout.orientation, layout.cardSize, i, videoIds[i]);
+			}
+
+			// cards[0]= new Card(layout.cardSize, layout.card1position, 1.5, fps, frontColor, cardImages[0], "586-LVjAQ4I");
+			// cards[1] = new Card(layout.cardSize, layout.card2position, 1.5, fps, frontColor, cardImages[1], "ZXNpKL6eYuM");
+			// cards[2] = new Card(layout.cardSize, layout.card3position, 1.5, fps, frontColor, cardImages[2], "opA-7BP88pI");
 		};
 
 		/*-------- draw --------*/
@@ -178,7 +200,8 @@
 				puzzle.display(started, transition);
 			}
 
-			if (solved) cards.forEach(function (c) {
+			// if (solved) cards.forEach(c => c.display());
+			cards.forEach(function (c) {
 				return c.display();
 			});
 			if (solved && endTransition && !introSound.isPlaying()) {
@@ -206,40 +229,41 @@
 				if (!solved && _distance < puzzle.getSize()) {
 					solved = puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 
+					// when first solved...
 					if (solved) {
 						introSound.play();
 						endTransition = true;
 						// init cards
-						cards[0] = new _Card2.default(layout.cardSize, layout.card1position, 1.5, fps, frontColor, cardImages[0], "https://youtu.be/586-LVjAQ4I");
-						cards[1] = new _Card2.default(layout.cardSize, layout.card2position, 1.5, fps, frontColor, cardImages[1], "https://youtu.be/ZXNpKL6eYuM");
-						cards[2] = new _Card2.default(layout.cardSize, layout.card3position, 1.5, fps, frontColor, cardImages[2], "https://youtu.be/opA-7BP88pI");
+						cards[0] = new _Card2.default(layout.cardSize, layout.card1position, 1.5, fps, frontColor, cardImages[0], "586-LVjAQ4I");
+						cards[1] = new _Card2.default(layout.cardSize, layout.card2position, 1.5, fps, frontColor, cardImages[1], "ZXNpKL6eYuM");
+						cards[2] = new _Card2.default(layout.cardSize, layout.card3position, 1.5, fps, frontColor, cardImages[2], "opA-7BP88pI");
 					}
 				}
 			}
 
-			if (solved) {
-				for (var i = 0; i < cards.length; i++) {
-					var _distance2 = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, cards[i].getX(), cards[i].getY());
-					if (_distance2 < cards[i].getSize()) {
-						fullLoop.stop();
-						introSound.play();
-						cards[i].bang();
-					}
+			/*-------- solved --------*/
+			// if (solved) {
+			// 	for (let i = 0; i < cards.length; i++) {
+			// 		let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, cards[i].getX(), cards[i].getY());
+			// 		if (distance < cards[i].getSize()) {
+			// 			fullLoop.stop();
+			// 			introSound.play();
+			// 			cards[i].bang();
+			// 		}
+			// 	}
+			// }
+
+			for (var i = 0; i < cards.length; i++) {
+				var _distance2 = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, cards[i].getX(), cards[i].getY());
+				if (_distance2 < cards[i].getSize()) {
+					// fullLoop.stop();
+					// introSound.play();
+					cards[i].bang(layout.orientation, layout.cardSize, i);
 				}
 			}
 
 			return false;
 		};
-
-		// p5.keyTyped = () => {
-
-		//   if (p5.key == 's' || p5.key == 'S') {
-		//     p5.saveCanvas('myCanvas_.png');
-		//   }
-
-		//   return false;
-
-		// }	
 	};
 
 	new _p2.default(sketch);
@@ -44233,7 +44257,7 @@
 /* 12 */
 /***/ function(module, exports) {
 
-	"use strict";
+	'use strict';
 
 	Object.defineProperty(exports, "__esModule", {
 		value: true
@@ -44244,13 +44268,13 @@
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 	var Card = function () {
-		function Card(size, endPosition, duration, fps, frontColor, image, link) {
+		function Card(size, endPosition, duration, fps, frontColor, image, videoId) {
 			_classCallCheck(this, Card);
 
 			this.size = size;
 			this.size2 = size;
 			this.alpha = 0;
-			this.link = link;
+			this.videoId = videoId;
 
 			this.image = image;
 
@@ -44279,7 +44303,7 @@
 		}
 
 		_createClass(Card, [{
-			key: "display",
+			key: 'display',
 			value: function display() {
 				this.update();
 				p5.imageMode(p5.CENTER);
@@ -44289,7 +44313,7 @@
 				p5.rect(this.position.x, this.position.y, this.size, this.size);
 			}
 		}, {
-			key: "update",
+			key: 'update',
 			value: function update() {
 				if (this.moving) {
 					if (this.position.dist(this.target) > this.speedLimit) {
@@ -44318,30 +44342,63 @@
 				if (this.alpha < 75) this.fadeIn();
 			}
 		}, {
-			key: "fadeIn",
+			key: 'fadeIn',
 			value: function fadeIn() {
 				this.alpha += this.fadeFactor / 5;
-				console.log(this.alpha);
+				// console.log(this.alpha);
 			}
 		}, {
-			key: "getX",
+			key: 'getX',
 			value: function getX() {
 				return this.position.x;
 			}
 		}, {
-			key: "getY",
+			key: 'getY',
 			value: function getY() {
 				return this.position.y;
 			}
 		}, {
-			key: "getSize",
+			key: 'getSize',
 			value: function getSize() {
 				return this.size / 2;
 			}
 		}, {
-			key: "bang",
-			value: function bang() {
-				window.open(this.link);
+			key: 'bang',
+			value: function bang(orientation, size, playerId) {
+				// window.open(this.link);
+				return this.createVideo(orientation, size, playerId);
+			}
+		}, {
+			key: 'createVideo',
+			value: function createVideo(orientation, size, playerId) {
+				var video = true;
+				console.log(orientation);
+
+				var player = void 0;
+				// let w = (orientation === 'portrait') ? p5.width/1.5 : p5.width/3;
+				// let h = (orientation === 'portrait') ? p5.height/3 : p5. height/3;
+				var w = size,
+				    h = size;
+
+				var wString = w.toString();
+				var hString = h.toString();
+
+				console.log(YT);
+
+				player = new YT.Player('player' + playerId.toString(), {
+					height: hString,
+					width: wString,
+					videoId: this.videoId,
+					playerVars: {
+						showinfo: '0',
+						color: 'white',
+						controls: '2'
+					}
+				});
+
+				console.log(player);
+
+				return true;
 			}
 		}]);
 
@@ -44349,6 +44406,42 @@
 	}();
 
 	exports.default = Card;
+
+/***/ },
+/* 13 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+		value: true
+	});
+
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+	var Video = function Video(orientation, size, playerId, videoId) {
+		_classCallCheck(this, Video);
+
+		var player = void 0;
+
+		var w = size,
+		    h = size;
+		var wString = w.toString(),
+		    hString = h.toString();
+
+		player = new YT.Player('player' + playerId.toString(), {
+			height: hString,
+			width: wString,
+			videoId: videoId,
+			playerVars: {
+				showinfo: '0',
+				color: 'white',
+				controls: '2'
+			}
+		});
+	};
+
+	exports.default = Video;
 
 /***/ }
 /******/ ]);
