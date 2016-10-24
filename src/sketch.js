@@ -29,6 +29,7 @@ const sketch = (p5) => {
 	let solved = false;
 	let transition = false;
 	let endTransition = false;
+	let displayingVideo = false;
 
 	// components
 	let layout;
@@ -88,6 +89,11 @@ const sketch = (p5) => {
 
 		// init button
 		button = new Button(layout, p5.width/2, p5.height/2, 1.5, fps, backColor, frontColor);
+
+		// cards
+		cards[0]= new Card(layout.cardSize, layout.card1position, 1.5, fps, frontColor, cardImages[0], "586-LVjAQ4I");
+		cards[1] = new Card(layout.cardSize, layout.card2position, 1.5, fps, frontColor, cardImages[1], "ZXNpKL6eYuM");
+		cards[2] = new Card(layout.cardSize, layout.card3position, 1.5, fps, frontColor, cardImages[2], "opA-7BP88pI");
 	}
 
 	/*-------- draw --------*/
@@ -106,7 +112,8 @@ const sketch = (p5) => {
 			puzzle.display(started, transition);
 		}
 
-		if (solved) cards.forEach(c => c.display());
+		// if (solved) cards.forEach(c => c.display());
+		cards.forEach(c => c.display());
 		if (solved && endTransition && !introSound.isPlaying()) {
 			fullLoop.loop();
 			endTransition = false;
@@ -132,40 +139,41 @@ const sketch = (p5) => {
 			if (!solved && distance < puzzle.getSize()) {
 				solved = puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 
+				// when first solved...
 				if (solved) {
 					introSound.play();
 					endTransition = true;
 					// init cards
-					cards[0]= new Card(layout.cardSize, layout.card1position, 1.5, fps, frontColor, cardImages[0], "https://youtu.be/586-LVjAQ4I");
-					cards[1] = new Card(layout.cardSize, layout.card2position, 1.5, fps, frontColor, cardImages[1], "https://youtu.be/ZXNpKL6eYuM");
-					cards[2] = new Card(layout.cardSize, layout.card3position, 1.5, fps, frontColor, cardImages[2], "https://youtu.be/opA-7BP88pI");
+					cards[0]= new Card(layout.cardSize, layout.card1position, 1.5, fps, frontColor, cardImages[0], "586-LVjAQ4I");
+					cards[1] = new Card(layout.cardSize, layout.card2position, 1.5, fps, frontColor, cardImages[1], "ZXNpKL6eYuM");
+					cards[2] = new Card(layout.cardSize, layout.card3position, 1.5, fps, frontColor, cardImages[2], "opA-7BP88pI");
 				}
 			}
 		}
 
-		if (solved) {
-			for (let i = 0; i < cards.length; i++) {
-				let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, cards[i].getX(), cards[i].getY());
-				if (distance < cards[i].getSize()) {
-					fullLoop.stop();
-					introSound.play();
-					cards[i].bang();
-				}
+		/*-------- solved --------*/
+		// if (solved) {
+		// 	for (let i = 0; i < cards.length; i++) {
+		// 		let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, cards[i].getX(), cards[i].getY());
+		// 		if (distance < cards[i].getSize()) {
+		// 			fullLoop.stop();
+		// 			introSound.play();
+		// 			cards[i].bang();
+		// 		}
+		// 	}
+		// }
+
+		for (let i = 0; i < cards.length; i++) {
+			let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, cards[i].getX(), cards[i].getY());
+			if (distance < cards[i].getSize()) {
+				// fullLoop.stop();
+				// introSound.play();
+				cards[i].bang(layout.orientation);
 			}
 		}
 
 		return false;
-	}
-
-	// p5.keyTyped = () => {
-  
-	//   if (p5.key == 's' || p5.key == 'S') {
-	//     p5.saveCanvas('myCanvas_.png');
-	//   }
-  
-	//   return false;
-	  
-	// }	
+	}	
 }
 
 new p5(sketch);
