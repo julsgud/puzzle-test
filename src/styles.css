@@ -64,5 +64,5 @@ canvas {
 }
 
 .visible {
-	opacity: 1;
+	opacity: .8;
 }

@@ -116,7 +116,7 @@
 		var spaces = 9;
 		var vc = void 0;
 		var videos = new Array(3);
-		var videoIds = ["586-LVjAQ4I", "ZXNpKL6eYuM", "opA-7BP88pI"];
+		var videoIds = ["CnqVH7kWjlA", "ZXNpKL6eYuM", "GspBmzxwNz0"];
 		var cards = new Array(3);
 
 		// colors
@@ -134,10 +134,6 @@
 
 			for (var _i = 0; _i < images.length; _i++) {
 				images[_i] = p5.loadImage('assets/pz' + _i.toString() + '.png');
-			}
-
-			for (var _i2 = 0; _i2 < cardImages.length; _i2++) {
-				cardImages[_i2] = p5.loadImage('assets/c' + _i2.toString() + '.png');
 			}
 
 			tabacGlam = p5.loadFont('./assets/tabac_glam.ttf');
@@ -177,10 +173,6 @@
 			for (var i = 0; i < videos.length; i++) {
 				videos[i] = new _Video2.default(layout.orientation, layout.cardSize, i, videoIds[i]);
 			}
-
-			// cards[0]= new Card(layout.cardSize, layout.card1position, 1.5, fps, frontColor, cardImages[0], "586-LVjAQ4I");
-			// cards[1] = new Card(layout.cardSize, layout.card2position, 1.5, fps, frontColor, cardImages[1], "ZXNpKL6eYuM");
-			// cards[2] = new Card(layout.cardSize, layout.card3position, 1.5, fps, frontColor, cardImages[2], "opA-7BP88pI");
 		};
 
 		/*-------- draw --------*/
@@ -197,11 +189,6 @@
 				}
 			} else if (started && !transition && !solved) {
 				puzzle.display(started, transition);
-			}
-
-			if (solved && endTransition && !introSound.isPlaying()) {
-				fullLoop.loop();
-				endTransition = false;
 			}
 		};
 
@@ -228,22 +215,9 @@
 					if (solved) {
 						introSound.play();
 						vc.className = layout.orientation.toString() + " top visible";
-						endTransition = true;
 					}
 				}
 			}
-
-			/*-------- solved --------*/
-			// if (solved) {
-			// 	for (let i = 0; i < cards.length; i++) {
-			// 		let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, cards[i].getX(), cards[i].getY());
-			// 		if (distance < cards[i].getSize()) {
-			// 			fullLoop.stop();
-			// 			introSound.play();
-			// 			cards[i].bang();
-			// 		}
-			// 	}
-			// }
 
 			return false;
 		};
