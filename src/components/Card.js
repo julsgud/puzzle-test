@@ -1,9 +1,9 @@
 export default class Card {
-	constructor(size, endPosition, duration, fps, frontColor, image, link) {
+	constructor(size, endPosition, duration, fps, frontColor, image, videoId) {
 		this.size = size;
 		this.size2 = size;
 		this.alpha = 0;
-		this.link = link;
+		this.videoId = videoId;
 
 		this.image = image;
 
@@ -71,7 +71,7 @@ export default class Card {
 
 	fadeIn() {
 		this.alpha += this.fadeFactor/5;
-		console.log(this.alpha);
+		// console.log(this.alpha);
 	}
 
 	getX() {
@@ -86,7 +86,40 @@ export default class Card {
 		return this.size/2;
 	}
 
-	bang() {
-		window.open(this.link);
+	bang(orientation, size, playerId) {
+		// window.open(this.link);
+		return this.createVideo(orientation, size, playerId);
 	}
+
+	createVideo(orientation, size, playerId) {
+		let video = true;
+		console.log(orientation);
+
+		let player;
+		// let w = (orientation === 'portrait') ? p5.width/1.5 : p5.width/3;
+		// let h = (orientation === 'portrait') ? p5.height/3 : p5. height/3;
+		let w = size, h = size;
+
+		let wString = w.toString();
+		let hString = h.toString();
+
+		console.log(YT);
+
+		player = new YT.Player('player' + playerId.toString(), {
+			height: hString,
+			width: wString,
+			videoId: this.videoId,
+			playerVars: {
+				showinfo: '0',
+				color: 'white',
+				controls: '2'
+			}
+		});
+
+		console.log(player);
+
+		return true;
+	}
+
+
 }
