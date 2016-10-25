@@ -31,7 +31,8 @@ module.exports = {
     },
     plugins: [
         new CopyWebpackPlugin([
-            {from: './src/assets', to: './assets' }
+            {from: './src/assets', to: './assets'},
+            {from: './src/styles.css'}
         ]),
         new HtmlWebpackPlugin({
             title: 'puzzle-test',

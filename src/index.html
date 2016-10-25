@@ -8,9 +8,9 @@
     <meta property="og:url" content="https://project-6307555188817434923.firebaseapp.com/"/>
     <meta property="og:title" content="I Can Chase Dragons ~ Fauna"/>
     <meta property="og:image" content="http://imgur.com/a/7at3M"/>
-    
     <meta property="og:description" content="Ordena el caos, encuentra unas sorpresas y únete a la fiesta!"/>
     <title> iccd </title>
+    <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
 <body style="padding:0; margin:0; overflow: hidden;">
 <script>
@@ -30,5 +30,17 @@
      fjs.parentNode.insertBefore(js, fjs);
    }(document, 'script', 'facebook-jssdk'));
 </script>
+<script>
+  // 2. This code loads the IFrame Player API code asynchronously.
+  var tag = document.createElement('script');
+  tag.src = "https://www.youtube.com/iframe_api";
+  var firstScriptTag = document.getElementsByTagName('script')[0];
+  firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+</script>
+<div id="video-container">
+  <div id="player0"></div>
+  <div id="player1"></div>
+  <div id="player2"></div>
+</div>
 </body>
 </html> 

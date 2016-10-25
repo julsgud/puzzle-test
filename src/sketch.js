@@ -7,6 +7,7 @@ import Helpers from './components/Helpers';
 import Shapes from './components/Shapes';
 import Button from './components/Button';
 import Card from './components/Card';
+import Video from './components/Video';
 
 const sketch = (p5) => {
 	// make library globally available
@@ -29,6 +30,7 @@ const sketch = (p5) => {
 	let solved = false;
 	let transition = false;
 	let endTransition = false;
+	let displayingVideo = false;
 
 	// components
 	let layout;
@@ -37,6 +39,9 @@ const sketch = (p5) => {
 	let button;
 	let puzzle;
 	let spaces = 9;
+	let vc;
+	let videos = new Array(3);
+	let videoIds = ["586-LVjAQ4I", "ZXNpKL6eYuM", "opA-7BP88pI"];
 	let cards = new Array(3);
 
 	// colors
@@ -79,15 +84,29 @@ const sketch = (p5) => {
 		// layout
 		if (p5.width <= p5.height) {
 			layout = Helpers.initPortrait(p5.width, p5.height, spaces);
+			vc = document.getElementById('video-container');
+			vc.className += "portrait back transparent";
 		} else {
 			layout = Helpers.initLandscape(p5.width, p5.height, spaces);
+			vc = document.getElementById('video-container');
+			vc.className += "landscape back transparent";
 		}
+
 
 		// init shapes
 		shapes = new Shapes(layout.orientation, layout.puzzleSize*.84, shapeCount, 4 , fps, frontColor);
 
 		// init button
 		button = new Button(layout, p5.width/2, p5.height/2, 1.5, fps, backColor, frontColor);
+
+		// videos
+		for (let i = 0; i < videos.length; i++) {
+			videos[i] = new Video(layout.orientation, layout.cardSize, i, videoIds[i]);
+		}
+
+		// cards[0]= new Card(layout.cardSize, layout.card1position, 1.5, fps, frontColor, cardImages[0], "586-LVjAQ4I");
+		// cards[1] = new Card(layout.cardSize, layout.card2position, 1.5, fps, frontColor, cardImages[1], "ZXNpKL6eYuM");
+		// cards[2] = new Card(layout.cardSize, layout.card3position, 1.5, fps, frontColor, cardImages[2], "opA-7BP88pI");
 	}
 
 	/*-------- draw --------*/
@@ -106,7 +125,6 @@ const sketch = (p5) => {
 			puzzle.display(started, transition);
 		}
 
-		if (solved) cards.forEach(c => c.display());
 		if (solved && endTransition && !introSound.isPlaying()) {
 			fullLoop.loop();
 			endTransition = false;
@@ -132,40 +150,29 @@ const sketch = (p5) => {
 			if (!solved && distance < puzzle.getSize()) {
 				solved = puzzle.movePiece(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY);
 
+				// when first solved...
 				if (solved) {
 					introSound.play();
+					vc.className = layout.orientation.toString() + " top visible";
 					endTransition = true;
-					// init cards
-					cards[0]= new Card(layout.cardSize, layout.card1position, 1.5, fps, frontColor, cardImages[0], "https://youtu.be/586-LVjAQ4I");
-					cards[1] = new Card(layout.cardSize, layout.card2position, 1.5, fps, frontColor, cardImages[1], "https://youtu.be/ZXNpKL6eYuM");
-					cards[2] = new Card(layout.cardSize, layout.card3position, 1.5, fps, frontColor, cardImages[2], "https://youtu.be/opA-7BP88pI");
 				}
 			}
 		}
 
-		if (solved) {
-			for (let i = 0; i < cards.length; i++) {
-				let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, cards[i].getX(), cards[i].getY());
-				if (distance < cards[i].getSize()) {
-					fullLoop.stop();
-					introSound.play();
-					cards[i].bang();
-				}
-			}
-		}
+		/*-------- solved --------*/
+		// if (solved) {
+		// 	for (let i = 0; i < cards.length; i++) {
+		// 		let distance = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, cards[i].getX(), cards[i].getY());
+		// 		if (distance < cards[i].getSize()) {
+		// 			fullLoop.stop();
+		// 			introSound.play();
+		// 			cards[i].bang();
+		// 		}
+		// 	}
+		// }
 
 		return false;
-	}
-
-	// p5.keyTyped = () => {
-  
-	//   if (p5.key == 's' || p5.key == 'S') {
-	//     p5.saveCanvas('myCanvas_.png');
-	//   }
-  
-	//   return false;
-	  
-	// }	
+	}	
 }
 
 new p5(sketch);
