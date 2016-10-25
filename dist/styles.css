@@ -29,6 +29,12 @@ canvas {
 	height: 100%;
 	margin: 0 auto;
 	padding: 0;
+
+	-webkit-transition: opacity 2s ease-in;
+       -moz-transition: opacity 2s ease-in;
+        -ms-transition: opacity 2s ease-in;
+         -o-transition: opacity 2s ease-in;
+            transition: opacity 2s ease-in;
 }
 
 .landscape {
@@ -45,10 +51,18 @@ canvas {
    	flex-direction: column;
 }
 
+.transparent {
+	opacity: 0;
+}
+
 .back {
 	z-index: -1;
 }
 
 .top {
 	z-index: 1;
+}
+
+.visible {
+	opacity: 1;
 }

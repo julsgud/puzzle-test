@@ -114,6 +114,7 @@
 		var button = void 0;
 		var puzzle = void 0;
 		var spaces = 9;
+		var vc = void 0;
 		var videos = new Array(3);
 		var videoIds = ["586-LVjAQ4I", "ZXNpKL6eYuM", "opA-7BP88pI"];
 		var cards = new Array(3);
@@ -158,14 +159,12 @@
 			// layout
 			if (p5.width <= p5.height) {
 				layout = _Helpers2.default.initPortrait(p5.width, p5.height, spaces);
-				var vc = document.getElementById('video-container');
-				vc.className += "portrait";
-				vc.className += " back";
+				vc = document.getElementById('video-container');
+				vc.className += "portrait back transparent";
 			} else {
 				layout = _Helpers2.default.initLandscape(p5.width, p5.height, spaces);
-				var _vc = document.getElementById('video-container');
-				_vc.className += "landscape";
-				_vc.className += " back";
+				vc = document.getElementById('video-container');
+				vc.className += "landscape back transparent";
 			}
 
 			// init shapes
@@ -200,10 +199,6 @@
 				puzzle.display(started, transition);
 			}
 
-			// if (solved) cards.forEach(c => c.display());
-			cards.forEach(function (c) {
-				return c.display();
-			});
 			if (solved && endTransition && !introSound.isPlaying()) {
 				fullLoop.loop();
 				endTransition = false;
@@ -232,11 +227,8 @@
 					// when first solved...
 					if (solved) {
 						introSound.play();
+						vc.className = layout.orientation.toString() + " top visible";
 						endTransition = true;
-						// init cards
-						cards[0] = new _Card2.default(layout.cardSize, layout.card1position, 1.5, fps, frontColor, cardImages[0], "586-LVjAQ4I");
-						cards[1] = new _Card2.default(layout.cardSize, layout.card2position, 1.5, fps, frontColor, cardImages[1], "ZXNpKL6eYuM");
-						cards[2] = new _Card2.default(layout.cardSize, layout.card3position, 1.5, fps, frontColor, cardImages[2], "opA-7BP88pI");
 					}
 				}
 			}
@@ -252,15 +244,6 @@
 			// 		}
 			// 	}
 			// }
-
-			for (var i = 0; i < cards.length; i++) {
-				var _distance2 = p5.dist(p5.mouseX || p5.touchX, p5.mouseY || p5.touchY, cards[i].getX(), cards[i].getY());
-				if (_distance2 < cards[i].getSize()) {
-					// fullLoop.stop();
-					// introSound.play();
-					cards[i].bang(layout.orientation, layout.cardSize, i);
-				}
-			}
 
 			return false;
 		};
